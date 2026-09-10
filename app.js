@@ -131,11 +131,17 @@ async function authenticateUser() {
   errorElement.innerText = "Credentials verified. Dispatching 2FA Code via email...";
 
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ actionType: "SEND_2FA_CODE", username: pendingUser.username })
-    });
+   // Replace your fetch call with this exact configuration:
+const response = await fetch(API_URL, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'text/plain;charset=utf-8' // <--- MUST BE text/plain to bypass CORS
+  },
+  body: JSON.stringify({
+    actionType: 'SEND_2FA_CODE',
+    username: pendingUser.username
+  })
+});
     const result = await response.json();
 
     if (result.status === "SUCCESS") {
