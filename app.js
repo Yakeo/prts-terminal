@@ -202,27 +202,45 @@ function logout() {
 function applyRBAC() {
   const restockBtn = document.getElementById('nav-restock');
   const upgradeBtn = document.getElementById('nav-upgrades');
+  const logsBtn = document.querySelector("button[onclick*='logs']");
 
   if (!currentUser) return;
 
   if (currentUser.role === "Read-Only") {
-    restockBtn.classList.add('opacity-50', 'pointer-events-none');
-    upgradeBtn.classList.add('opacity-50', 'pointer-events-none');
+    // Lock out restricted action tabs
+    if (restockBtn) restockBtn.classList.add('opacity-40', 'pointer-events-none');
+    if (upgradeBtn) upgradeBtn.classList.add('opacity-40', 'pointer-events-none');
+    if (logsBtn) logsBtn.classList.add('opacity-40', 'pointer-events-none');
+    
     switchTab('warehouse');
   } else {
-    restockBtn.classList.remove('opacity-50', 'pointer-events-none');
-    upgradeBtn.classList.remove('opacity-50', 'pointer-events-none');
+    // Restore buttons for Admin / Manager
+    if (restockBtn) restockBtn.classList.remove('opacity-40', 'pointer-events-none');
+    if (upgradeBtn) upgradeBtn.classList.remove('opacity-40', 'pointer-events-none');
+    if (logsBtn) logsBtn.classList.remove('opacity-40', 'pointer-events-none');
+    
     switchTab('dashboard');
   }
 }
 
-// Navigation Tab Switching
+// Navigation Tab Switching Guarded by RBAC
 function switchTab(tabName) {
+  // Prevent Read-Only users from entering restricted views
+  if (currentUser?.role === 'Read-Only' && ['restock', 'upgrades', 'logs'].includes(tabName)) {
+    alert("ACCESS DENIED: Read-Only personnel clearance level insufficient.");
+    return;
+  }
+
   const views = document.querySelectorAll('.tab-view');
   views.forEach(view => view.classList.add('hidden'));
 
   const activeView = document.getElementById(`view-${tabName}`);
   if (activeView) activeView.classList.remove('hidden');
+
+  // Update active sidebar button styling
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.querySelector(`button[onclick*='${tabName}']`);
+  if (activeBtn) activeBtn.classList.add('active');
 
   updateAllDisplays();
 }
