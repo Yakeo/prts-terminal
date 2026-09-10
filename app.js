@@ -131,31 +131,32 @@ async function authenticateUser() {
   errorElement.innerText = "Credentials verified. Dispatching 2FA Code via email...";
 
   try {
-   // Replace your fetch call with this exact configuration:
-const response = await fetch(API_URL, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'text/plain;charset=utf-8' // <--- MUST BE text/plain to bypass CORS
-  },
-  body: JSON.stringify({
-    actionType: 'SEND_2FA_CODE',
-    username: pendingUser.username
-  })
-});
-    const result = await response.json();
+    // 1. Generate 6-digit OTP code on client side
+    generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-    if (result.status === "SUCCESS") {
-      generatedOTP = result.code;
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('otpModal').classList.remove('hidden');
-      errorElement.innerText = "";
-    } else {
-      errorElement.innerText = "ERR: No authorized email address associated with user account.";
-    }
+    // 2. Dispatch email request to Google Apps Script using no-cors
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Bypasses CORS preflight completely
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        actionType: 'SEND_2FA_CODE',
+        username: pendingUser.username,
+        code: generatedOTP
+      })
+    });
+
+    // 3. Directly display the OTP Modal
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('otpModal').classList.remove('hidden');
+    errorElement.innerText = "";
+
   } catch (err) {
+    console.error("2FA Error:", err);
     errorElement.innerText = "ERR: Failed to connect to email verification service.";
   }
-}
 }
 
 
