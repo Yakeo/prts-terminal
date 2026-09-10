@@ -149,7 +149,7 @@ async function authenticateUser() {
     errorElement.innerText = "ERR: Failed to connect to email verification service.";
   }
 }
-
+}
 let pendingUser = null;
 let generatedOTP = null;
 
