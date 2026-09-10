@@ -1,13 +1,12 @@
-// REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
 const API_URL = "https://script.google.com/macros/s/AKfycbz9ivBZxvB0AkK8uZ1rx70zXJQpgARqXfmxavyT2iGfmRmVHZ5_9mX9ybzg49FcHb8c/exec";
 
-// Global Memory State (Synced with Database)
+
 let userDatabase = [];
 let inventory = { lmd: 0, exp: 0, sugar: 0 };
 let auditLogs = [];
 let currentUser = null;
 
-// Initialize & Fetch Live Data from Google Sheets API
+
 document.addEventListener('DOMContentLoaded', () => {
   fetchCloudData();
 
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// GET Request to Cloud DB
+
 async function fetchCloudData() {
   const errorElement = document.getElementById('loginError');
   if (errorElement) errorElement.innerText = "Connecting to PRTS Cloud DB...";
@@ -43,7 +42,7 @@ async function fetchCloudData() {
   }
 }
 
-// POST Sync Engine (Inventory & Logs)
+
 async function syncToCloud(actionType, payloadData) {
   try {
     await fetch(API_URL, {
@@ -59,11 +58,10 @@ async function syncToCloud(actionType, payloadData) {
   }
 }
 
-// Brute Force Attack Prevention (IAS101 Security)
+
 let failedLoginAttempts = 0;
 let isLockedOut = false;
 
-// 1. Web Crypto API - Native SHA-256 Hashing Function
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
