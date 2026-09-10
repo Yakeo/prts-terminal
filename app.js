@@ -75,7 +75,7 @@ async function hashPassword(password) {
 // 2. Updated Async Authentication Engine (with 2FA Email Dispatch)
 async function authenticateUser() {
   const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
-  const passInput = document.getElementById('loginPass').value.trim();
+  const passInput = document.getElementById('loginPass').value.trim().replace(/^["']|["']$/g, '');
   const errorElement = document.getElementById('loginError');
 
   if (isLockedOut) {
