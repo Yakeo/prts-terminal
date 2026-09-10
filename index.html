@@ -45,82 +45,89 @@
           <p>• <span class="text-white">operator</span> / <span class="text-cyan-400">op123</span> (Read-Only)</p>
         </div>
 
+        <!-- NEW PERSONNEL REGISTRATION TRIGGER -->
+        <div class="text-center pt-1">
+          <button onclick="toggleRegisterModal(true)" class="text-xs text-cyan-400 hover:underline font-mono">
+            + Register New Personnel Account
+          </button>
+        </div>
+
         <div id="loginError" class="text-xs text-red-400 text-center font-mono min-h-[1rem]"></div>
       </div>
     </div>
   </div>
 
   <!-- 2FA VERIFICATION MODAL -->
-<div id="otpModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-  <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-sm w-full p-6 space-y-4 text-center">
-    <div class="border-b border-slate-800 pb-3">
-      <h3 class="text-lg font-bold uppercase text-cyan-400">2FA Security Verification</h3>
-      <p class="text-[10px] text-slate-400">A 6-digit access token was dispatched to your authorized email address.</p>
-    </div>
-
-    <div>
-      <input type="text" id="otpInput" maxlength="6" placeholder="000000" class="w-full text-center text-2xl font-mono tracking-widest bg-slate-800 border border-slate-700 rounded p-3 text-cyan-300 focus:outline-none focus:border-cyan-400">
-      <p id="otpError" class="text-xs font-mono text-red-400 mt-2 h-4"></p>
-    </div>
-
-    <button onclick="verify2FACode()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
-      Verify Clearance Code
-    </button>
-  </div>
-</div>
-
-<!-- USER REGISTRATION MODAL -->
-<div id="registerModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-  <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-md w-full p-6 space-y-4">
-    <div class="border-b border-slate-800 pb-3 text-center">
-      <h3 class="text-lg font-bold uppercase text-cyan-400">Personnel Registration</h3>
-      <p class="text-[10px] text-slate-400">Create new personnel profile in PRTS core database.</p>
-    </div>
-
-    <div class="space-y-3">
-      <div>
-        <label class="block text-[10px] uppercase text-slate-400 mb-1">Username / Personnel ID</label>
-        <input type="text" id="regUser" placeholder="e.g. kaltsit" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+  <div id="otpModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-sm w-full p-6 space-y-4 text-center">
+      <div class="border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold uppercase text-cyan-400">2FA Security Verification</h3>
+        <p class="text-[10px] text-slate-400">A 6-digit access token was dispatched to your authorized email address.</p>
       </div>
 
       <div>
-        <label class="block text-[10px] uppercase text-slate-400 mb-1">Display Name</label>
-        <input type="text" id="regDisplayName" placeholder="e.g. Dr. Kal'tsit" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+        <input type="text" id="otpInput" maxlength="6" placeholder="000000" class="w-full text-center text-2xl font-mono tracking-widest bg-slate-800 border border-slate-700 rounded p-3 text-cyan-300 focus:outline-none focus:border-cyan-400">
+        <p id="otpError" class="text-xs font-mono text-red-400 mt-2 h-4"></p>
       </div>
 
-      <div>
-        <label class="block text-[10px] uppercase text-slate-400 mb-1">Email Address (For 2FA)</label>
-        <input type="email" id="regEmail" placeholder="doctor@rhodes.island" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
-      </div>
-
-      <div>
-        <label class="block text-[10px] uppercase text-slate-400 mb-1">Security Passcode</label>
-        <input type="password" id="regPass" placeholder="Enter secure key..." class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
-      </div>
-
-      <div>
-        <label class="block text-[10px] uppercase text-slate-400 mb-1">Role Assignment</label>
-        <select id="regRole" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
-          <option value="Read-Only">Read-Only (Operator)</option>
-          <option value="Manager">Manager (Logistics)</option>
-          <option value="Admin">Admin (Executive)</option>
-        </select>
-      </div>
-
-      <p id="regError" class="text-xs font-mono text-red-400 text-center h-4"></p>
-    </div>
-
-    <div class="flex gap-2">
-      <button onclick="toggleRegisterModal(false)" class="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs rounded transition">
-        Cancel
-      </button>
-      <button onclick="registerUser()" class="w-1/2 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
-        Register Account
+      <button onclick="verify2FACode()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
+        Verify Clearance Code
       </button>
     </div>
   </div>
-</div>
-  
+
+  <!-- USER REGISTRATION MODAL -->
+  <div id="registerModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-md w-full p-6 space-y-4">
+      <div class="border-b border-slate-800 pb-3 text-center">
+        <h3 class="text-lg font-bold uppercase text-cyan-400">Personnel Registration</h3>
+        <p class="text-[10px] text-slate-400">Create new personnel profile in PRTS core database.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[10px] uppercase text-slate-400 mb-1">Username / Personnel ID</label>
+          <input type="text" id="regUser" placeholder="e.g. kaltsit" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase text-slate-400 mb-1">Display Name</label>
+          <input type="text" id="regDisplayName" placeholder="e.g. Dr. Kal'tsit" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase text-slate-400 mb-1">Email Address (For 2FA)</label>
+          <input type="email" id="regEmail" placeholder="doctor@rhodes.island" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase text-slate-400 mb-1">Security Passcode</label>
+          <input type="password" id="regPass" placeholder="Enter secure key..." class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase text-slate-400 mb-1">Role Assignment</label>
+          <select id="regRole" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+            <option value="Read-Only">Read-Only (Operator)</option>
+            <option value="Manager">Manager (Logistics)</option>
+            <option value="Admin">Admin (Executive)</option>
+          </select>
+        </div>
+
+        <p id="regError" class="text-xs font-mono text-red-400 text-center h-4"></p>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="toggleRegisterModal(false)" class="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs rounded transition">
+          Cancel
+        </button>
+        <button onclick="registerUser()" class="w-1/2 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
+          Register Account
+        </button>
+      </div>
+    </div>
+  </div>
+    
   <!-- Mobile Header -->
   <div class="md:hidden bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
     <h1 class="text-xl font-bold prts-accent tracking-widest">PRTS // v4.2</h1>
@@ -153,7 +160,6 @@
   <!-- Main Content Area -->
   <main class="flex-1 overflow-y-auto p-4 md:p-8">
     
-    <!-- 01. DASHBOARD VIEW -->
     <!-- 01. DASHBOARD VIEW -->
     <section id="view-dashboard" class="tab-view max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
