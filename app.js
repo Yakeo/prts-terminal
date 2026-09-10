@@ -233,7 +233,26 @@ function switchTab(tabName) {
   updateAllDisplays();
 }
 
-// Populate Operators into UI
+// Function to dynamically update the preview image and details
+function updateOperatorPreview() {
+  const opSelect = document.getElementById('operatorSelect');
+  if (!opSelect) return;
+
+  const selectedId = opSelect.value;
+  const op = OPERATORS.find(o => o.id === selectedId);
+
+  const imgEl = document.getElementById('opPreviewImg');
+  const nameEl = document.getElementById('opPreviewName');
+  const infoEl = document.getElementById('opPreviewInfo');
+
+  if (op && imgEl && nameEl && infoEl) {
+    imgEl.src = op.avatar;
+    nameEl.innerText = op.name;
+    infoEl.innerText = `${'★'.repeat(op.rarity)} | ${op.class}`;
+  }
+}
+
+// Function to populate the dropdown and trigger initial preview
 function populateOperatorDropdown() {
   const opSelect = document.getElementById('operatorSelect');
   if (!opSelect) return;
@@ -241,6 +260,9 @@ function populateOperatorDropdown() {
   opSelect.innerHTML = OPERATORS.map(op => 
     `<option value="${op.id}">${op.name} (${op.class}) - ${'★'.repeat(op.rarity)}</option>`
   ).join('');
+
+  // Call update preview right after populating
+  updateOperatorPreview();
 }
 
 // Populate Item Options dynamically into Restock & Upgrade dropdowns
