@@ -191,26 +191,109 @@ function logout() {
 
 // RBAC Rules
 function applyRBAC() {
+  if (!currentUser) return;
+
+  const role = currentUser.role;
+
   const restockBtn = document.getElementById('nav-restock');
   const upgradeBtn = document.getElementById('nav-upgrades');
   const logsBtn = document.querySelector("button[onclick*='logs']");
+  const accessBtn = document.querySelector("button[onclick*='access']");
+  const adminPanel = document.getElementById('adminCreatePersonnelCard');
 
-  if (!currentUser) return;
+  // Reset states
+  [restockBtn, upgradeBtn, logsBtn, accessBtn].forEach(btn => {
+    if (btn) {
+      btn.classList.remove('opacity-40', 'pointer-events-none', 'hidden');
+    }
+  });
 
-  if (currentUser.role === "Read-Only") {
+  if (role === 'Admin') {
+    // Admins have unrestricted access
+    if (adminPanel) adminPanel.classList.remove('hidden');
+    switchTab('dashboard');
+
+  } else if (role === 'Manager') {
+    // Managers can Restock & Upgrade, but CANNOT access Logs or Access Control Settings
+    if (logsBtn) logsBtn.classList.add('opacity-40', 'pointer-events-none');
+    if (accessBtn) accessBtn.classList.add('opacity-40', 'pointer-events-none');
+    if (adminPanel) adminPanel.classList.add('hidden');
+    switchTab('dashboard');
+
+  } else { 
+    // Operator or Read-Only: Restricted to Warehouse view only
     if (restockBtn) restockBtn.classList.add('opacity-40', 'pointer-events-none');
     if (upgradeBtn) upgradeBtn.classList.add('opacity-40', 'pointer-events-none');
     if (logsBtn) logsBtn.classList.add('opacity-40', 'pointer-events-none');
+    if (accessBtn) accessBtn.classList.add('opacity-40', 'pointer-events-none');
+    if (adminPanel) adminPanel.classList.add('hidden');
     
     switchTab('warehouse');
-  } else {
-    if (restockBtn) restockBtn.classList.remove('opacity-40', 'pointer-events-none');
-    if (upgradeBtn) upgradeBtn.classList.remove('opacity-40', 'pointer-events-none');
-    if (logsBtn) logsBtn.classList.remove('opacity-40', 'pointer-events-none');
-    
-    switchTab('dashboard');
   }
 }
+
+// Function for Admins to create elevated accounts from inside the terminal
+async function adminProvisionUser() {
+  if (!currentUser || currentUser.role !== 'Admin') {
+    alert("ACCESS DENIED: Only Admin personnel can provision accounts.");
+    return;
+  }
+
+  const username = document.getElementById('adminRegUser').value.trim().toLowerCase();
+  const displayName = document.getElementById('adminRegDisplayName').value.trim();
+  const email = document.getElementById('adminRegEmail').value.trim();
+  const pass = document.getElementById('adminRegPass').value.trim();
+  const role = document.getElementById('adminRegRole').value;
+  const regMsg = document.getElementById('adminRegMsg');
+
+  if (!username || !displayName || !email || !pass) {
+    regMsg.className = "mt-2 text-xs font-mono text-red-400";
+    regMsg.innerText = "ERR: All fields are required.";
+    return;
+  }
+
+  regMsg.className = "mt-2 text-xs font-mono text-cyan-400";
+  regMsg.innerText = "Provisioning personnel record...";
+
+  const passHash = await hashPassword(pass);
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        actionType: "REGISTER_USER",
+        username,
+        displayName,
+        email,
+        passHash,
+        role
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.status === "SUCCESS") {
+      userDatabase.push({ username, pass: passHash, displayName, role, email });
+      addAuditLog("ADMIN_PROVISION", `Admin '${currentUser.displayName}' created account '${displayName}' as [${role}].`);
+      
+      regMsg.className = "mt-2 text-xs font-mono text-emerald-400";
+      regMsg.innerText = `SUCCESS: Account for ${displayName} [${role}] provisioned.`;
+
+      document.getElementById('adminRegUser').value = "";
+      document.getElementById('adminRegDisplayName').value = "";
+      document.getElementById('adminRegEmail').value = "";
+      document.getElementById('adminRegPass').value = "";
+    } else {
+      regMsg.className = "mt-2 text-xs font-mono text-red-400";
+      regMsg.innerText = "ERR: Account ID already exists or database error.";
+    }
+  } catch (err) {
+    regMsg.className = "mt-2 text-xs font-mono text-red-400";
+    regMsg.innerText = "ERR: Connection failed.";
+  }
+}
+
 
 // Navigation Tab Switching Guarded by RBAC
 function switchTab(tabName) {
