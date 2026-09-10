@@ -90,11 +90,19 @@ async function authenticateUser() {
   // Hash the entered password before checking the database
   const hashedInput = await hashPassword(passInput);
 
-  // Match against Username OR Email address
-  const foundUser = userDatabase.find(
-    u => (u.username === userInput || u.email?.toLowerCase() === userInput) && u.pass === hashedInput
-  );
+  // 1. Find user by username or email first
+    const foundUser = userDatabase.find(
+      u => u.username === userInput || u.email?.toLowerCase() === userInput
+    );
 
+    // DEBUG LOGS - Open your browser F12 Console to see these!
+    console.log("Input Hashed:", hashedInput);
+    console.log("DB User Found:", foundUser);
+    console.log("DB Hashed Pass:", foundUser ? foundUser.pass : "NO USER MATCH");
+
+    // 2. Validate password hash
+    if (!foundUser || foundUser.pass !== hashedInput) {
+      // Failed login logic below...
   if (!foundUser) {
     failedLoginAttempts++;
     if (failedLoginAttempts >= 3) {
