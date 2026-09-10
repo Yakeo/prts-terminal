@@ -158,7 +158,7 @@ async function authenticateUser() {
     errorElement.innerText = "ERR: Failed to connect to email verification service.";
   }
 }
-
+}
 
 function verify2FACode() {
   const enteredCode = document.getElementById('otpInput').value.trim();
