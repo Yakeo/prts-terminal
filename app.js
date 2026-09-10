@@ -372,3 +372,81 @@ function renderLogTable(logsToRender) {
 renderAuditLogs = function() {
   filterAuditLogs();
 };
+// Toggle modal visibility
+function toggleRegisterModal(show) {
+  const regModal = document.getElementById('registerModal');
+  const loginModal = document.getElementById('loginModal');
+  if (show) {
+    loginModal.classList.add('hidden');
+    regModal.classList.remove('hidden');
+  } else {
+    regModal.classList.add('hidden');
+    loginModal.classList.remove('hidden');
+  }
+}
+
+// Register new user
+async function registerUser() {
+  const username = document.getElementById('regUser').value.trim().toLowerCase();
+  const displayName = document.getElementById('regDisplayName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value.trim();
+  const role = document.getElementById('regRole').value;
+  const regError = document.getElementById('regError');
+
+  if (!username || !displayName || !email || !pass) {
+    regError.innerText = "REJECTED: Fill out all personnel fields.";
+    return;
+  }
+
+  // Email format validation
+  if (!email.includes('@')) {
+    regError.innerText = "REJECTED: Invalid email address format.";
+    return;
+  }
+
+  regError.innerText = "Encrypting key & creating account...";
+
+  // Hash password using SHA-256 before transmitting or saving
+  const passHash = await hashPassword(pass);
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        actionType: "REGISTER_USER",
+        username,
+        displayName,
+        email,
+        passHash,
+        role
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.status === "SUCCESS") {
+      // Dynamically add to local array so they can log in right away without refreshing
+      userDatabase.push({ username, pass: passHash, displayName, role, email });
+
+      addAuditLog("USER_REGISTRATION", `New user profile '${displayName}' registered as ${role}.`);
+      alert("Registration Successful! You can now authenticate with your credentials.");
+      
+      // Clear inputs and switch back to login modal
+      document.getElementById('regUser').value = "";
+      document.getElementById('regDisplayName').value = "";
+      document.getElementById('regEmail').value = "";
+      document.getElementById('regPass').value = "";
+      regError.innerText = "";
+      
+      toggleRegisterModal(false);
+    } else if (result.status === "ERR_USER_EXISTS") {
+      regError.innerText = "REJECTED: Personnel ID already registered.";
+    } else {
+      regError.innerText = "ERR: Registration failed. Try again.";
+    }
+  } catch (err) {
+    regError.innerText = "ERR: Failed to connect to core database.";
+  }
+}
