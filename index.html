@@ -210,12 +210,13 @@
           <input type="password" id="regPass" placeholder="Enter secure key..." class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
+        <!-- Inside #registerModal -->
         <div>
-          <label class="block text-[10px] uppercase text-slate-400 mb-1">Role Assignment</label>
-          <select id="regRole" class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
-            <option value="Read-Only">Read-Only (Operator)</option>
-            <option value="Manager">Manager (Logistics)</option>
-            <option value="Admin">Admin (Executive)</option>
+          <label class="block text-xs uppercase text-slate-400 mb-1">Assigned Role</label>
+          <select id="regRole" class="w-full bg-slate-900 border border-slate-700 p-2 text-white font-mono text-sm">
+            <option value="Operator">Operator (Standard)</option>
+            <option value="Manager">Manager (Inventory Lead)</option>
+            <option value="Read-Only">Read-Only (Observer)</option>
           </select>
         </div>
 
