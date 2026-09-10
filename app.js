@@ -5,7 +5,8 @@ let userDatabase = [];
 let inventory = { lmd: 0, exp: 0, sugar: 0 };
 let auditLogs = [];
 let currentUser = null;
-
+let pendingUser = null;
+let generatedOTP = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchCloudData();
@@ -150,8 +151,7 @@ async function authenticateUser() {
   }
 }
 }
-let pendingUser = null;
-let generatedOTP = null;
+
 
 function verify2FACode() {
   const enteredCode = document.getElementById('otpInput').value.trim();
