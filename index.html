@@ -384,24 +384,20 @@
                 <p id="opPreviewInfo" class="text-xs text-cyan-400 font-mono">★★★★★ | Caster</p>
               </div>
             </div>
-            <select id="operatorSelect" class="w-full bg-slate-950 border border-slate-700 p-2 text-white">
-              <option value="Amiya">Amiya (Caster)</option>
-              <option value="SilverAsh">SilverAsh (Guard)</option>
-              <option value="Kal'tsit">Kal'tsit (Medic)</option>
+            <select id="operatorSelect" onchange="updateOperatorPreview()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 p-2.5 rounded-none font-mono text-sm focus:outline-none focus:border-cyan-500">
+              <!-- Dynamic options populated by app.js -->
             </select>
-          </div>
-          <div>
+            </div>
+            <div>
             <label class="block text-xs uppercase text-slate-400 mb-1">Select Material Required</label>
-            <select id="itemSelect" class="w-full bg-slate-950 border border-slate-700 p-2 text-white">
-              <option value="lmd">LMD (Currency)</option>
-              <option value="exp">Battle Record (EXP)</option>
-              <option value="sugar">Sugar Pack</option>
+            <select id="itemSelect" class="w-full bg-slate-900 border border-slate-700 p-2 text-white font-mono text-sm">
+              <!-- Dynamic options populated by app.js -->
             </select>
-          </div>
-          <div>
-            <label class="block text-xs uppercase text-slate-400 mb-1">Amount to Deduct</label>
-            <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="1000" min="1">
-          </div>
+            </div>
+                      <div>
+                        <label class="block text-xs uppercase text-slate-400 mb-1">Amount to Deduct</label>
+                        <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="1000" min="1">
+                      </div>
           <button onclick="processUpgrade()" class="prts-btn w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-bold tracking-widest uppercase transition">
             Execute Consumption
           </button>
