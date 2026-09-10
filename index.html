@@ -4,41 +4,147 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PRTS - Rhodes Island Terminal</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts for Tactical Monospace Look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <!-- Embedded Arknights Custom UI Styles -->
   <style>
-    body { background-color: #0d1117; color: #c9d1d9; font-family: 'Courier New', monospace; }
-    .prts-border { border: 1px solid #30363d; }
-    .prts-accent { color: #00f0ff; }
-    .prts-bg-accent { background-color: #00f0ff; }
+    :root {
+      --prts-cyan: #00f0ff;
+      --prts-cyan-glow: rgba(0, 240, 255, 0.4);
+      --prts-orange: #ff9900;
+      --prts-amber: #ffc700;
+      --prts-bg-dark: #0b0e14;
+      --prts-card-bg: rgba(18, 24, 34, 0.85);
+      --prts-border: #202b3c;
+    }
+
+    body {
+      background-color: var(--prts-bg-dark);
+      color: #c9d1d9;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    /* CRT Scanline overlay effect */
+    body::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 99;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* Custom PRTS Borders & Accents */
+    .prts-border {
+      border: 1px solid var(--prts-border);
+      position: relative;
+    }
+
+    .prts-border::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px;
+      width: 6px; height: 6px;
+      border-top: 2px solid var(--prts-cyan);
+      border-left: 2px solid var(--prts-cyan);
+    }
+
+    .prts-border::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; right: -1px;
+      width: 6px; height: 6px;
+      border-bottom: 2px solid var(--prts-cyan);
+      border-right: 2px solid var(--prts-cyan);
+    }
+
+    .prts-accent {
+      color: var(--prts-cyan);
+      text-shadow: 0 0 8px var(--prts-cyan-glow);
+    }
+
+    .prts-bg-accent {
+      background-color: var(--prts-cyan);
+    }
+
+    /* Arknights Angled Cutout Buttons */
+    .prts-btn {
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: all 0.2s ease;
+    }
+
+    .prts-btn:hover {
+      box-shadow: 0 0 12px var(--prts-cyan-glow);
+      filter: brightness(1.2);
+    }
+
+    /* Active Sidebar Navigation Item */
+    .nav-btn.active {
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.2) 0%, rgba(0, 240, 255, 0) 100%);
+      border-left: 4px solid var(--prts-cyan);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0e14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1c2738;
+      border: 1px solid var(--prts-cyan);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--prts-cyan);
+    }
   </style>
 </head>
 <body class="flex flex-col md:flex-row h-screen overflow-hidden">
 
   <!-- AUTHENTICATION OVERLAY (RAW LOGIN MODAL) -->
-  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4">
-    <div class="bg-slate-900 prts-border p-6 md:p-8 rounded max-w-md w-full space-y-6 shadow-2xl">
-      <div class="border-b border-slate-800 pb-4 text-center">
+  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900/90 prts-border p-6 md:p-8 max-w-md w-full space-y-6 shadow-2xl">
+      <div class="border-b border-cyan-500/30 pb-4 text-center relative">
+        <div class="absolute top-0 right-0 text-[10px] text-cyan-500 tracking-widest">SYS.PRTS.4.2</div>
         <h1 class="text-3xl font-black prts-accent tracking-widest">PRTS AUTH</h1>
-        <p class="text-xs text-slate-500 mt-1">RHODES ISLAND OPERATIONAL TERMINAL</p>
+        <p class="text-xs text-slate-400 mt-1">RHODES ISLAND OPERATIONAL TERMINAL</p>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs uppercase text-slate-400 mb-1">Personnel ID / Username</label>
-          <input type="text" id="loginUser" placeholder="e.g. doctor, amiya, operator" class="w-full bg-slate-800 border border-slate-700 rounded p-3 text-white focus:outline-none focus:border-cyan-400">
+          <label class="block text-xs uppercase text-slate-400 mb-1 tracking-wider">Personnel ID / Username</label>
+          <input type="text" id="loginUser" placeholder="e.g. doctor, amiya, operator" class="w-full bg-slate-950 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-cyan-400 font-mono">
         </div>
 
         <div>
-          <label class="block text-xs uppercase text-slate-400 mb-1">Security Passcode</label>
-          <input type="password" id="loginPass" placeholder="Enter security key..." class="w-full bg-slate-800 border border-slate-700 rounded p-3 text-white focus:outline-none focus:border-cyan-400">
+          <label class="block text-xs uppercase text-slate-400 mb-1 tracking-wider">Security Passcode</label>
+          <input type="password" id="loginPass" placeholder="Enter security key..." class="w-full bg-slate-950 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-cyan-400 font-mono">
         </div>
 
-        <button onclick="authenticateUser()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold tracking-widest uppercase transition">
+        <button onclick="authenticateUser()" class="prts-btn w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-bold tracking-widest uppercase">
           Authenticate Clearance
         </button>
         
         <!-- Demo Credentials Reference -->
-        <div class="p-3 bg-slate-950 rounded border border-slate-800 text-[11px] text-slate-400 space-y-1 font-mono">
+        <div class="p-3 bg-slate-950 rounded-none border border-slate-800 text-[11px] text-slate-400 space-y-1 font-mono">
           <p class="text-cyan-400 font-bold">DATABASE TEST ACCOUNTS:</p>
           <p>• <span class="text-white">doctor</span> / <span class="text-cyan-400">rhodes2026</span> (Admin)</p>
           <p>• <span class="text-white">amiya</span> / <span class="text-cyan-400">bunny2026</span> (Manager)</p>
@@ -47,7 +153,7 @@
 
         <!-- NEW PERSONNEL REGISTRATION TRIGGER -->
         <div class="text-center pt-1">
-          <button onclick="toggleRegisterModal(true)" class="text-xs text-cyan-400 hover:underline font-mono">
+          <button onclick="toggleRegisterModal(true)" class="text-xs text-cyan-400 hover:underline font-mono tracking-wider">
             + Register New Personnel Account
           </button>
         </div>
@@ -59,18 +165,18 @@
 
   <!-- 2FA VERIFICATION MODAL -->
   <div id="otpModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-    <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-sm w-full p-6 space-y-4 text-center">
+    <div class="bg-slate-900 prts-border max-w-sm w-full p-6 space-y-4 text-center">
       <div class="border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-bold uppercase text-cyan-400">2FA Security Verification</h3>
+        <h3 class="text-lg font-bold uppercase text-cyan-400 tracking-wider">2FA Security Verification</h3>
         <p class="text-[10px] text-slate-400">A 6-digit access token was dispatched to your authorized email address.</p>
       </div>
 
       <div>
-        <input type="text" id="otpInput" maxlength="6" placeholder="000000" class="w-full text-center text-2xl font-mono tracking-widest bg-slate-800 border border-slate-700 rounded p-3 text-cyan-300 focus:outline-none focus:border-cyan-400">
+        <input type="text" id="otpInput" maxlength="6" placeholder="000000" class="w-full text-center text-2xl font-mono tracking-widest bg-slate-950 border border-slate-700 p-3 text-cyan-300 focus:outline-none focus:border-cyan-400">
         <p id="otpError" class="text-xs font-mono text-red-400 mt-2 h-4"></p>
       </div>
 
-      <button onclick="verify2FACode()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
+      <button onclick="verify2FACode()" class="prts-btn w-full py-2 bg-cyan-500 text-slate-950 font-bold uppercase text-xs">
         Verify Clearance Code
       </button>
     </div>
@@ -78,36 +184,36 @@
 
   <!-- USER REGISTRATION MODAL -->
   <div id="registerModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-    <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-md w-full p-6 space-y-4">
+    <div class="bg-slate-900 prts-border max-w-md w-full p-6 space-y-4">
       <div class="border-b border-slate-800 pb-3 text-center">
-        <h3 class="text-lg font-bold uppercase text-cyan-400">Personnel Registration</h3>
+        <h3 class="text-lg font-bold uppercase text-cyan-400 tracking-wider">Personnel Registration</h3>
         <p class="text-[10px] text-slate-400">Create new personnel profile in PRTS core database.</p>
       </div>
 
       <div class="space-y-3">
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Username / Personnel ID</label>
-          <input type="text" id="regUser" placeholder="e.g. kaltsit" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+          <input type="text" id="regUser" placeholder="e.g. kaltsit" class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Display Name</label>
-          <input type="text" id="regDisplayName" placeholder="e.g. Dr. Kal'tsit" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+          <input type="text" id="regDisplayName" placeholder="e.g. Dr. Kal'tsit" class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Email Address (For 2FA)</label>
-          <input type="email" id="regEmail" placeholder="doctor@rhodes.island" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+          <input type="email" id="regEmail" placeholder="doctor@rhodes.island" class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Security Passcode</label>
-          <input type="password" id="regPass" placeholder="Enter secure key..." class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+          <input type="password" id="regPass" placeholder="Enter secure key..." class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Role Assignment</label>
-          <select id="regRole" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
+          <select id="regRole" class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
             <option value="Read-Only">Read-Only (Operator)</option>
             <option value="Manager">Manager (Logistics)</option>
             <option value="Admin">Admin (Executive)</option>
@@ -118,10 +224,10 @@
       </div>
 
       <div class="flex gap-2">
-        <button onclick="toggleRegisterModal(false)" class="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs rounded transition">
+        <button onclick="toggleRegisterModal(false)" class="w-1/2 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs transition">
           Cancel
         </button>
-        <button onclick="registerUser()" class="w-1/2 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
+        <button onclick="registerUser()" class="prts-btn w-1/2 py-2 bg-cyan-500 text-slate-950 font-bold uppercase text-xs">
           Register Account
         </button>
       </div>
@@ -129,31 +235,31 @@
   </div>
     
   <!-- Mobile Header -->
-  <div class="md:hidden bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
+  <div class="md:hidden bg-slate-900 p-4 border-b border-slate-800 flex justify-between items-center">
     <h1 class="text-xl font-bold prts-accent tracking-widest">PRTS // v4.2</h1>
     <button id="menuBtn" class="text-slate-300 focus:outline-none text-2xl">☰</button>
   </div>
 
   <!-- 7-Item Navigation Pane -->
-  <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-64 bg-slate-900 prts-border p-4 space-y-2 flex-shrink-0">
-    <div class="hidden md:block mb-6">
+  <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-64 bg-slate-900/90 prts-border p-4 space-y-2 flex-shrink-0">
+    <div class="hidden md:block mb-6 border-b border-slate-800 pb-3">
       <h1 class="text-2xl font-black prts-accent tracking-widest">PRTS SYSTEM</h1>
-      <p class="text-xs text-slate-500">RHODES ISLAND TERMINAL</p>
+      <p class="text-[10px] text-slate-500 tracking-widest">RHODES ISLAND TERMINAL</p>
     </div>
     
-    <button onclick="switchTab('dashboard')" class="nav-btn w-full text-left p-3 rounded bg-slate-800 text-white font-bold hover:bg-cyan-900 transition">01. Dashboard</button>
-    <button onclick="switchTab('warehouse')" class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 transition">02. Warehouse</button>
-    <button id="nav-restock" onclick="switchTab('restock')" class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 transition">03. Restock Ops</button>
-    <button id="nav-upgrades" onclick="switchTab('upgrades')" class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 transition">04. Operator Upgrades</button>
-    <button onclick="switchTab('logs')" class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 transition">05. Security Logs</button>
-    <button onclick="switchTab('rbac')" class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 transition">06. Access Control</button>
-    <button onclick="switchTab('settings')" class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 transition">07. Settings</button>
+    <button onclick="switchTab('dashboard')" class="nav-btn active w-full text-left p-3 text-sm font-bold tracking-wider hover:bg-cyan-950/40 transition">01. Dashboard</button>
+    <button onclick="switchTab('warehouse')" class="nav-btn w-full text-left p-3 text-sm tracking-wider hover:bg-cyan-950/40 transition">02. Warehouse</button>
+    <button id="nav-restock" onclick="switchTab('restock')" class="nav-btn w-full text-left p-3 text-sm tracking-wider hover:bg-cyan-950/40 transition">03. Restock Ops</button>
+    <button id="nav-upgrades" onclick="switchTab('upgrades')" class="nav-btn w-full text-left p-3 text-sm tracking-wider hover:bg-cyan-950/40 transition">04. Operator Upgrades</button>
+    <button onclick="switchTab('logs')" class="nav-btn w-full text-left p-3 text-sm tracking-wider hover:bg-cyan-950/40 transition">05. Security Logs</button>
+    <button onclick="switchTab('rbac')" class="nav-btn w-full text-left p-3 text-sm tracking-wider hover:bg-cyan-950/40 transition">06. Access Control</button>
+    <button onclick="switchTab('settings')" class="nav-btn w-full text-left p-3 text-sm tracking-wider hover:bg-cyan-950/40 transition">07. Settings</button>
     
     <div class="mt-auto pt-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
       <div>
         ACTIVE: <span id="currentUserDisplay" class="text-cyan-400 font-bold">UNAUTHENTICATED</span>
       </div>
-      <button onclick="logout()" class="text-[10px] text-red-400 hover:underline">LOGOUT</button>
+      <button onclick="logout()" class="text-[10px] text-red-400 hover:underline tracking-widest">LOGOUT</button>
     </div>
   </nav>
 
@@ -163,12 +269,12 @@
     <!-- 01. DASHBOARD VIEW -->
     <section id="view-dashboard" class="tab-view max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">Command Center Dashboard</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Command Center Dashboard</h2>
         <p class="text-xs text-slate-400">Rhodes Island Terminal Overview</p>
       </div>
 
       <!-- DYNAMIC LOW STOCK ALERT BANNER (Hidden by default) -->
-      <div id="alertBanner" class="hidden bg-red-950/80 border border-red-500/50 p-4 rounded text-red-200 flex items-center justify-between">
+      <div id="alertBanner" class="hidden bg-red-950/80 border border-red-500/50 p-4 text-red-200 flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <span class="text-xl animate-pulse">⚠️</span>
           <div>
@@ -179,16 +285,16 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-slate-900 p-4 prts-border rounded">
-          <p class="text-xs text-slate-400 uppercase">System Status</p>
+        <div class="bg-slate-900/80 p-4 prts-border">
+          <p class="text-xs text-slate-400 uppercase tracking-wider">System Status</p>
           <p class="text-xl font-bold text-emerald-400">ONLINE</p>
         </div>
-        <div class="bg-slate-900 p-4 prts-border rounded">
-          <p class="text-xs text-slate-400 uppercase">Total Categories</p>
+        <div class="bg-slate-900/80 p-4 prts-border">
+          <p class="text-xs text-slate-400 uppercase tracking-wider">Total Categories</p>
           <p class="text-xl font-bold text-cyan-400">3 Items</p>
         </div>
-        <div class="bg-slate-900 p-4 prts-border rounded">
-          <p class="text-xs text-slate-400 uppercase">Active Clearance</p>
+        <div class="bg-slate-900/80 p-4 prts-border">
+          <p class="text-xs text-slate-400 uppercase tracking-wider">Active Clearance</p>
           <p id="dashRoleDisplay" class="text-xl font-bold text-amber-400">None</p>
         </div>
       </div>
@@ -197,17 +303,17 @@
     <!-- 02. WAREHOUSE VIEW -->
     <section id="view-warehouse" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">Resource Warehouse</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Resource Warehouse</h2>
         <p class="text-xs text-slate-400">Full Inventory Depot</p>
       </div>
-      <div class="bg-slate-900 p-6 rounded prts-border">
+      <div class="bg-slate-900/80 p-6 prts-border">
         <table class="w-full text-left text-sm">
           <thead class="text-xs uppercase text-slate-400 border-b border-slate-800">
             <tr>
-              <th class="pb-3">Item Name</th>
-              <th class="pb-3">Type</th>
-              <th class="pb-3">In Stock</th>
-              <th class="pb-3">Status</th>
+              <th class="pb-3 tracking-wider">Item Name</th>
+              <th class="pb-3 tracking-wider">Type</th>
+              <th class="pb-3 tracking-wider">In Stock</th>
+              <th class="pb-3 tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800">
@@ -237,13 +343,13 @@
     <!-- 03. RESTOCK VIEW (STOCK IN) -->
     <section id="view-restock" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">Operation Restock</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operation Restock</h2>
         <p class="text-xs text-slate-400">Add materials acquired from operations</p>
       </div>
-      <div class="bg-slate-900 p-6 rounded prts-border space-y-4 max-w-md">
+      <div class="bg-slate-900/80 p-6 prts-border space-y-4 max-w-md">
         <div>
           <label class="block text-xs uppercase text-slate-400 mb-1">Select Item to Restock</label>
-          <select id="restockItem" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white">
+          <select id="restockItem" class="w-full bg-slate-950 border border-slate-700 p-2 text-white">
             <option value="lmd">LMD (Currency)</option>
             <option value="exp">Battle Record (EXP)</option>
             <option value="sugar">Sugar Pack</option>
@@ -251,9 +357,9 @@
         </div>
         <div>
           <label class="block text-xs uppercase text-slate-400 mb-1">Amount Acquired</label>
-          <input type="number" id="restockQty" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white" value="100" min="1">
+          <input type="number" id="restockQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="100" min="1">
         </div>
-        <button onclick="processRestock()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-black font-bold tracking-widest uppercase transition">
+        <button onclick="processRestock()" class="prts-btn w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest uppercase transition">
           Add Stock
         </button>
         <div id="restockMsg" class="text-xs font-mono text-slate-500 min-h-[1.5rem]"></div>
@@ -263,15 +369,15 @@
     <!-- 04. OPERATOR UPGRADES VIEW (STOCK OUT) -->
     <section id="view-upgrades" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">Operator Upgrade Protocol</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operator Upgrade Protocol</h2>
         <p class="text-xs text-slate-400">Deduct resources directly from inventory storage</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-slate-900 p-6 rounded prts-border space-y-4">
+        <div class="bg-slate-900/80 p-6 prts-border space-y-4">
           <div>
             <label class="block text-xs uppercase text-slate-400 mb-1">Target Operator</label>
-            <select id="operatorSelect" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white">
+            <select id="operatorSelect" class="w-full bg-slate-950 border border-slate-700 p-2 text-white">
               <option value="Amiya">Amiya (Caster)</option>
               <option value="SilverAsh">SilverAsh (Guard)</option>
               <option value="Kal'tsit">Kal'tsit (Medic)</option>
@@ -279,7 +385,7 @@
           </div>
           <div>
             <label class="block text-xs uppercase text-slate-400 mb-1">Select Material Required</label>
-            <select id="itemSelect" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white">
+            <select id="itemSelect" class="w-full bg-slate-950 border border-slate-700 p-2 text-white">
               <option value="lmd">LMD (Currency)</option>
               <option value="exp">Battle Record (EXP)</option>
               <option value="sugar">Sugar Pack</option>
@@ -287,14 +393,14 @@
           </div>
           <div>
             <label class="block text-xs uppercase text-slate-400 mb-1">Amount to Deduct</label>
-            <input type="number" id="deductQty" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white" value="1000" min="1">
+            <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="1000" min="1">
           </div>
-          <button onclick="processUpgrade()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold tracking-widest uppercase transition">
+          <button onclick="processUpgrade()" class="prts-btn w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-bold tracking-widest uppercase transition">
             Execute Consumption
           </button>
         </div>
 
-        <div class="bg-slate-900 p-6 rounded prts-border flex flex-col justify-between">
+        <div class="bg-slate-900/80 p-6 prts-border flex flex-col justify-between">
           <div>
             <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Stock Ledger</h3>
             <ul class="space-y-3">
@@ -320,19 +426,19 @@
     <!-- 05. SECURITY AUDIT LOGS VIEW -->
     <section id="view-logs" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">Security Audit Logs</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Security Audit Logs</h2>
         <p class="text-xs text-slate-400">Immutable transaction log tracking all material actions (IAS101 Standard)</p>
       </div>
 
       <!-- FILTER & SEARCH BAR -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-900 p-4 rounded prts-border">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-900/80 p-4 prts-border">
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Search Keywords</label>
-          <input type="text" id="logSearchInput" oninput="filterAuditLogs()" placeholder="Search user or details..." class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+          <input type="text" id="logSearchInput" oninput="filterAuditLogs()" placeholder="Search user or details..." class="w-full bg-slate-950 border border-slate-700 p-2 text-xs text-white focus:outline-none focus:border-cyan-400">
         </div>
         <div>
           <label class="block text-[10px] uppercase text-slate-400 mb-1">Filter by Action</label>
-          <select id="logActionFilter" onchange="filterAuditLogs()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+          <select id="logActionFilter" onchange="filterAuditLogs()" class="w-full bg-slate-950 border border-slate-700 p-2 text-xs text-white focus:outline-none focus:border-cyan-400">
             <option value="ALL">All Actions</option>
             <option value="LOGIN">LOGIN</option>
             <option value="DEDUCT">DEDUCT</option>
@@ -342,13 +448,13 @@
           </select>
         </div>
         <div class="flex items-end">
-          <button onclick="clearLogFilters()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded border border-slate-700 transition">
+          <button onclick="clearLogFilters()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 transition">
             Clear Filters
           </button>
         </div>
       </div>
 
-      <div class="bg-slate-900 p-6 rounded prts-border">
+      <div class="bg-slate-900/80 p-6 prts-border">
         <table class="w-full text-left text-sm">
           <thead class="text-xs uppercase text-slate-400 border-b border-slate-800">
             <tr>
@@ -368,13 +474,13 @@
     <!-- 06. ACCESS CONTROL VIEW -->
     <section id="view-rbac" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">Access Control Matrix</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Access Control Matrix</h2>
         <p class="text-xs text-slate-400">Role-Based Access Control (RBAC) Permissions</p>
       </div>
-      <div class="bg-slate-900 p-6 rounded prts-border space-y-4">
+      <div class="bg-slate-900/80 p-6 prts-border space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-4 border border-slate-800 rounded bg-slate-950">
-            <h3 class="text-cyan-400 font-bold uppercase">Doctor</h3>
+          <div class="p-4 border border-slate-800 bg-slate-950/80">
+            <h3 class="text-cyan-400 font-bold uppercase tracking-wider">Doctor</h3>
             <p class="text-xs text-slate-500 mt-1">Level 4 Admin Clearance</p>
             <ul class="text-xs mt-3 space-y-1 text-slate-300">
               <li>✓ View Warehouse</li>
@@ -383,8 +489,8 @@
               <li>✓ Access Security Logs</li>
             </ul>
           </div>
-          <div class="p-4 border border-slate-800 rounded bg-slate-950">
-            <h3 class="text-emerald-400 font-bold uppercase">Amiya</h3>
+          <div class="p-4 border border-slate-800 bg-slate-950/80">
+            <h3 class="text-emerald-400 font-bold uppercase tracking-wider">Amiya</h3>
             <p class="text-xs text-slate-500 mt-1">Level 2 Manager Clearance</p>
             <ul class="text-xs mt-3 space-y-1 text-slate-300">
               <li>✓ View Warehouse</li>
@@ -393,8 +499,8 @@
               <li>✓ Security Logs View</li>
             </ul>
           </div>
-          <div class="p-4 border border-slate-800 rounded bg-slate-950">
-            <h3 class="text-amber-400 font-bold uppercase">Operator</h3>
+          <div class="p-4 border border-slate-800 bg-slate-950/80">
+            <h3 class="text-amber-400 font-bold uppercase tracking-wider">Operator</h3>
             <p class="text-xs text-slate-500 mt-1">Level 1 Read-Only Clearance</p>
             <ul class="text-xs mt-3 space-y-1 text-slate-300">
               <li>✓ View Warehouse</li>
@@ -410,10 +516,10 @@
     <!-- 07. SETTINGS VIEW -->
     <section id="view-settings" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-wide">System Settings</h2>
+        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">System Settings</h2>
         <p class="text-xs text-slate-400">Terminal Configuration</p>
       </div>
-      <div class="bg-slate-900 p-6 rounded prts-border space-y-4">
+      <div class="bg-slate-900/80 p-6 prts-border space-y-4">
         <p class="text-xs text-slate-400">PRTS Mobile Bridge Integration Mode: Active (MIT App Inventor Compatible)</p>
       </div>
     </section>
