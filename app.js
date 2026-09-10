@@ -100,7 +100,15 @@ async function authenticateUser() {
     u => u.username === userInput || u.email?.toLowerCase() === userInput
   );
 
-  if (!foundUser || foundUser.pass !== hashedInput) {
+  // DEBUG LOGS - Open your browser F12 Console to see these!
+  console.log("Input Plain:", passInput);
+  console.log("Input Hashed:", hashedInput);
+  console.log("DB User Found:", foundUser);
+
+  // Allow match if DB stores hashed password OR legacy plain text password
+  const isValidPassword = foundUser && (foundUser.pass === hashedInput || foundUser.pass === passInput);
+
+  if (!foundUser || !isValidPassword) {
     failedLoginAttempts++;
     if (failedLoginAttempts >= 3) {
       isLockedOut = true;
