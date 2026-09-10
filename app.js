@@ -64,13 +64,21 @@ async function syncToCloud(actionType, logEntry = null) {
 let failedLoginAttempts = 0;
 let isLockedOut = false;
 
-// User Authentication Engine
-function authenticateUser() {
+// 1. Web Crypto API - Native SHA-256 Hashing Function
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 2. Updated Async Authentication Engine
+async function authenticateUser() {
   const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
   const passInput = document.getElementById('loginPass').value.trim();
   const errorElement = document.getElementById('loginError');
 
-  // Check if account login terminal is currently locked out
   if (isLockedOut) {
     errorElement.innerText = "SECURITY ALERT: Terminal locked due to repeated brute-force attempts. Try again in 30 seconds.";
     return;
@@ -81,18 +89,18 @@ function authenticateUser() {
     return;
   }
 
-  const foundUser = userDatabase.find(u => u.username === userInput && u.pass === passInput);
+  // Hash the entered password before checking the database
+  const hashedInput = await hashPassword(passInput);
+
+  // Compare hashed input against the stored SHA-256 string in userDatabase
+  const foundUser = userDatabase.find(u => u.username === userInput && u.pass === hashedInput);
 
   if (!foundUser) {
     failedLoginAttempts++;
-    
-    // Trigger Brute Force Lockout after 3 failed tries
     if (failedLoginAttempts >= 3) {
       isLockedOut = true;
       errorElement.innerText = "SECURITY ALERT: 3 Failed Attempts. TERMINAL LOCKED OUT FOR 30s.";
       addAuditLog("BRUTE_FORCE_LOCKOUT", `Terminal locked after 3 failed attempts for ID: '${userInput}'`);
-      
-      // Auto-unlock after 30 seconds
       setTimeout(() => {
         isLockedOut = false;
         failedLoginAttempts = 0;
@@ -106,25 +114,23 @@ function authenticateUser() {
     return;
   }
 
-  // Reset counters on successful login
+  // Success flow: proceed with session login / 2FA email code
   failedLoginAttempts = 0;
   isLockedOut = false;
-
+  
+  // (Your existing code to hide login modal and show dashboard)
   currentUser = foundUser;
   errorElement.innerText = "";
   document.getElementById('loginModal').classList.add('hidden');
-  
   document.getElementById('currentUserDisplay').innerText = `${currentUser.displayName} (${currentUser.role})`;
   document.getElementById('dashRoleDisplay').innerText = `${currentUser.displayName} [${currentUser.role}]`;
 
-  addAuditLog("LOGIN", `User '${currentUser.displayName}' authenticated as ${currentUser.role}.`);
+  addAuditLog("LOGIN", `User '${currentUser.displayName}' authenticated with SHA-256.`);
   applyRBAC();
-  
+
   document.getElementById('loginUser').value = "";
   document.getElementById('loginPass').value = "";
 }
-
-
 
 function logout() {
   currentUser = null;
