@@ -50,6 +50,27 @@
     </div>
   </div>
 
+  <!-- 2FA VERIFICATION MODAL -->
+<div id="otpModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
+  <div class="bg-slate-900 border border-cyan-500/30 rounded-lg max-w-sm w-full p-6 space-y-4 text-center">
+    <div class="border-b border-slate-800 pb-3">
+      <h3 class="text-lg font-bold uppercase text-cyan-400">2FA Security Verification</h3>
+      <p class="text-[10px] text-slate-400">A 6-digit access token was dispatched to your authorized email address.</p>
+    </div>
+
+    <div>
+      <input type="text" id="otpInput" maxlength="6" placeholder="000000" class="w-full text-center text-2xl font-mono tracking-widest bg-slate-800 border border-slate-700 rounded p-3 text-cyan-300 focus:outline-none focus:border-cyan-400">
+      <p id="otpError" class="text-xs font-mono text-red-400 mt-2 h-4"></p>
+    </div>
+
+    <button onclick="verify2FACode()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase text-xs rounded transition">
+      Verify Clearance Code
+    </button>
+  </div>
+</div>
+
+
+  
   <!-- Mobile Header -->
   <div class="md:hidden bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
     <h1 class="text-xl font-bold prts-accent tracking-widest">PRTS // v4.2</h1>
