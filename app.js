@@ -7,15 +7,14 @@ let currentUser = null;
 let pendingUser = null;
 let generatedOTP = null;
 
-// EXPANDED OPERATOR ROSTER
 const OPERATORS = [
-  { id: "Amiya", name: "Amiya", class: "Caster", rarity: 5 },
-  { id: "SilverAsh", name: "SilverAsh", class: "Guard", rarity: 6 },
-  { id: "Kaltsit", name: "Kal'tsit", class: "Medic", rarity: 6 },
-  { id: "Exusiai", name: "Exusiai", class: "Sniper", rarity: 6 },
-  { id: "Surtr", name: "Surtr", class: "Guard", rarity: 6 },
-  { id: "Texas", name: "Texas", class: "Vanguard", rarity: 5 },
-  { id: "Saria", name: "Saria", class: "Defender", rarity: 6 }
+  { id: "Amiya", name: "Amiya", class: "Caster", rarity: 5, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_002_amiya.png" },
+  { id: "SilverAsh", name: "SilverAsh", class: "Guard", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_010_chen.png" },
+  { id: "Kaltsit", name: "Kal'tsit", class: "Medic", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_003_kalts.png" },
+  { id: "Exusiai", name: "Exusiai", class: "Sniper", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_103_angel.png" },
+  { id: "Surtr", name: "Surtr", class: "Guard", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_350_surtr.png" },
+  { id: "Texas", name: "Texas", class: "Vanguard", rarity: 5, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_102_texas.png" },
+  { id: "Saria", name: "Saria", class: "Defender", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_202_demhar.png" }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -245,7 +244,7 @@ function updateOperatorPreview() {
   const nameEl = document.getElementById('opPreviewName');
   const infoEl = document.getElementById('opPreviewInfo');
 
-  if (op && imgEl && nameEl && infoEl) {
+  if (op && op.avatar && imgEl && nameEl && infoEl) {
     imgEl.src = op.avatar;
     nameEl.innerText = op.name;
     infoEl.innerText = `${'★'.repeat(op.rarity)} | ${op.class}`;
