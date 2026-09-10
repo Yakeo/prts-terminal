@@ -16,10 +16,9 @@
   <!-- Embedded Arknights Custom UI Styles -->
   <style>
     body.no-scanlines::before {
-  display: none !important;
-}
+      display: none !important;
+    }
 
-    
     :root {
       --prts-cyan: #00f0ff;
       --prts-cyan-glow: rgba(0, 240, 255, 0.4);
@@ -120,8 +119,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: var(--prts-cyan);
     }
-
-    
   </style>
 </head>
 <body class="flex flex-col md:flex-row h-screen overflow-hidden">
@@ -210,7 +207,6 @@
           <input type="password" id="regPass" placeholder="Enter secure key..." class="w-full bg-slate-950 border border-slate-700 p-2 text-white text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
-        <!-- Inside #registerModal -->
         <div>
           <label class="block text-xs uppercase text-slate-400 mb-1">Assigned Role</label>
           <select id="regRole" class="w-full bg-slate-900 border border-slate-700 p-2 text-white font-mono text-sm">
@@ -235,16 +231,20 @@
   </div>
     
   <!-- Mobile Header -->
-  <div class="md:hidden bg-slate-900 p-4 border-b border-slate-800 flex justify-between items-center">
+  <div class="md:hidden bg-slate-900 p-4 border-b border-slate-800 flex justify-between items-center z-30 relative">
     <h1 class="text-xl font-bold prts-accent tracking-widest">PRTS // v4.2</h1>
     <button id="menuBtn" class="text-slate-300 focus:outline-none text-2xl">☰</button>
   </div>
 
-  <!-- 7-Item Navigation Pane -->
-  <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-64 bg-slate-900/90 prts-border p-4 space-y-2 flex-shrink-0">
-    <div class="hidden md:block mb-6 border-b border-slate-800 pb-3">
-      <h1 class="text-2xl font-black prts-accent tracking-widest">PRTS SYSTEM</h1>
-      <p class="text-[10px] text-slate-500 tracking-widest">RHODES ISLAND TERMINAL</p>
+  <!-- Mobile Responsive Sidebar Drawer Navigation Pane -->
+  <nav id="sidebar" class="hidden md:flex flex-col fixed md:relative z-40 inset-y-0 left-0 w-64 bg-slate-950/95 md:bg-slate-900/90 backdrop-blur-md md:backdrop-blur-none prts-border p-4 space-y-2 flex-shrink-0">
+    <div class="flex justify-between items-center mb-4 md:mb-6 border-b border-slate-800 pb-3">
+      <div>
+        <h1 class="text-xl md:text-2xl font-black prts-accent tracking-widest">PRTS SYSTEM</h1>
+        <p class="text-[10px] text-slate-500 tracking-widest">RHODES ISLAND TERMINAL</p>
+      </div>
+      <!-- Mobile Close Drawer Button -->
+      <button onclick="document.getElementById('sidebar').classList.add('hidden')" class="md:hidden text-slate-400 hover:text-white text-xl p-1">✕</button>
     </div>
     
     <button onclick="switchTab('dashboard')" class="nav-btn active w-full text-left p-3 text-sm font-bold tracking-wider hover:bg-cyan-950/40 transition">01. Dashboard</button>
@@ -307,36 +307,39 @@
         <p class="text-xs text-slate-400">Full Inventory Depot</p>
       </div>
       <div class="bg-slate-900/80 p-6 prts-border">
-        <table class="w-full text-left text-sm">
-          <thead class="text-xs uppercase text-slate-400 border-b border-slate-800">
-            <tr>
-              <th class="pb-3 tracking-wider">Item Name</th>
-              <th class="pb-3 tracking-wider">Type</th>
-              <th class="pb-3 tracking-wider">In Stock</th>
-              <th class="pb-3 tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800">
-            <tr>
-              <td class="py-3 font-bold text-white">LMD</td>
-              <td class="py-3 text-slate-400">Currency</td>
-              <td id="wh-lmd" class="py-3 text-cyan-400 font-mono">250,000</td>
-              <td class="py-3 text-emerald-400 text-xs">SUFFICIENT</td>
-            </tr>
-            <tr>
-              <td class="py-3 font-bold text-white">Battle Record</td>
-              <td class="py-3 text-slate-400">EXP</td>
-              <td id="wh-exp" class="py-3 text-cyan-400 font-mono">450</td>
-              <td class="py-3 text-emerald-400 text-xs">SUFFICIENT</td>
-            </tr>
-            <tr>
-              <td class="py-3 font-bold text-white">Sugar Pack</td>
-              <td class="py-3 text-slate-400">Material</td>
-              <td id="wh-sugar" class="py-3 text-cyan-400 font-mono">32</td>
-              <td class="py-3 text-amber-400 text-xs">LOW STOCK</td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Overflow Container for Mobile Responsiveness -->
+        <div class="w-full overflow-x-auto">
+          <table class="w-full text-left text-sm min-w-[500px]">
+            <thead class="text-xs uppercase text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="pb-3 tracking-wider">Item Name</th>
+                <th class="pb-3 tracking-wider">Type</th>
+                <th class="pb-3 tracking-wider">In Stock</th>
+                <th class="pb-3 tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              <tr>
+                <td class="py-3 font-bold text-white">LMD</td>
+                <td class="py-3 text-slate-400">Currency</td>
+                <td id="wh-lmd" class="py-3 text-cyan-400 font-mono">250,000</td>
+                <td class="py-3 text-emerald-400 text-xs">SUFFICIENT</td>
+              </tr>
+              <tr>
+                <td class="py-3 font-bold text-white">Battle Record</td>
+                <td class="py-3 text-slate-400">EXP</td>
+                <td id="wh-exp" class="py-3 text-cyan-400 font-mono">450</td>
+                <td class="py-3 text-emerald-400 text-xs">SUFFICIENT</td>
+              </tr>
+              <tr>
+                <td class="py-3 font-bold text-white">Sugar Pack</td>
+                <td class="py-3 text-slate-400">Material</td>
+                <td id="wh-sugar" class="py-3 text-cyan-400 font-mono">32</td>
+                <td class="py-3 text-amber-400 text-xs">LOW STOCK</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -388,17 +391,17 @@
             <select id="operatorSelect" onchange="updateOperatorPreview()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 p-2.5 rounded-none font-mono text-sm focus:outline-none focus:border-cyan-500">
               <!-- Dynamic options populated by app.js -->
             </select>
-            </div>
-            <div>
+          </div>
+          <div>
             <label class="block text-xs uppercase text-slate-400 mb-1">Select Material Required</label>
             <select id="itemSelect" class="w-full bg-slate-900 border border-slate-700 p-2 text-white font-mono text-sm">
               <!-- Dynamic options populated by app.js -->
             </select>
-            </div>
-                      <div>
-                        <label class="block text-xs uppercase text-slate-400 mb-1">Amount to Deduct</label>
-                        <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="1000" min="1">
-                      </div>
+          </div>
+          <div>
+            <label class="block text-xs uppercase text-slate-400 mb-1">Amount to Deduct</label>
+            <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="1000" min="1">
+          </div>
           <button onclick="processUpgrade()" class="prts-btn w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-bold tracking-widest uppercase transition">
             Execute Consumption
           </button>
@@ -459,19 +462,22 @@
       </div>
 
       <div class="bg-slate-900/80 p-6 prts-border">
-        <table class="w-full text-left text-sm">
-          <thead class="text-xs uppercase text-slate-400 border-b border-slate-800">
-            <tr>
-              <th class="pb-3">Timestamp</th>
-              <th class="pb-3">User</th>
-              <th class="pb-3">Action</th>
-              <th class="pb-3">Details</th>
-            </tr>
-          </thead>
-          <tbody id="auditLogTable" class="divide-y divide-slate-800 font-mono text-xs">
-            <!-- Dynamic Logs Inserted Here -->
-          </tbody>
-        </table>
+        <!-- Overflow Container for Mobile Responsiveness -->
+        <div class="w-full overflow-x-auto">
+          <table class="w-full text-left text-sm min-w-[600px]">
+            <thead class="text-xs uppercase text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="pb-3">Timestamp</th>
+                <th class="pb-3">User</th>
+                <th class="pb-3">Action</th>
+                <th class="pb-3">Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogTable" class="divide-y divide-slate-800 font-mono text-xs">
+              <!-- Dynamic Logs Inserted Here -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -515,6 +521,7 @@
           </div>
         </div>
       </div>
+
       <!-- ADMIN-ONLY PERSONNEL CREATION PANEL -->
       <div id="adminCreatePersonnelCard" class="bg-slate-950 p-5 border border-cyan-500/30 hidden">
         <h3 class="text-sm font-bold uppercase text-cyan-400 tracking-wider mb-2">PRTS Clearance Provisioning (Admin Only)</h3>
