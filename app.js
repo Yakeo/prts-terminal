@@ -44,15 +44,14 @@ async function fetchCloudData() {
 }
 
 // POST Sync Engine (Inventory & Logs)
-async function syncToCloud(actionType, logEntry = null) {
+async function syncToCloud(actionType, payloadData) {
   try {
     await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Avoid CORS preflight flags
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         actionType: actionType,
-        inventory: inventory,
-        log: logEntry
+        ...payloadData
       })
     });
   } catch (err) {
@@ -74,6 +73,7 @@ async function hashPassword(password) {
 }
 
 // 2. Updated Async Authentication Engine
+// 2. Updated Async Authentication Engine (with 2FA Email Dispatch)
 async function authenticateUser() {
   const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
   const passInput = document.getElementById('loginPass').value.trim();
@@ -85,15 +85,17 @@ async function authenticateUser() {
   }
 
   if (!userInput || !passInput) {
-    errorElement.innerText = "REJECTED: Enter both Personnel ID and Passcode.";
+    errorElement.innerText = "REJECTED: Enter both Personnel ID/Email and Passcode.";
     return;
   }
 
   // Hash the entered password before checking the database
   const hashedInput = await hashPassword(passInput);
 
-  // Compare hashed input against the stored SHA-256 string in userDatabase
-  const foundUser = userDatabase.find(u => u.username === userInput && u.pass === hashedInput);
+  // Match against Username OR Email address
+  const foundUser = userDatabase.find(
+    u => (u.username === userInput || u.email?.toLowerCase() === userInput) && u.pass === hashedInput
+  );
 
   if (!foundUser) {
     failedLoginAttempts++;
@@ -114,23 +116,67 @@ async function authenticateUser() {
     return;
   }
 
-  // Success flow: proceed with session login / 2FA email code
+  // Credentials verified -> Reset lockout and request 2FA Email Code
   failedLoginAttempts = 0;
   isLockedOut = false;
+  pendingUser = foundUser;
   
-  // (Your existing code to hide login modal and show dashboard)
-  currentUser = foundUser;
-  errorElement.innerText = "";
-  document.getElementById('loginModal').classList.add('hidden');
+  errorElement.innerText = "Credentials verified. Dispatching 2FA Code via email...";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ actionType: "SEND_2FA_CODE", username: pendingUser.username })
+    });
+    const result = await response.json();
+
+    if (result.status === "SUCCESS") {
+      generatedOTP = result.code;
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('otpModal').classList.remove('hidden');
+      errorElement.innerText = "";
+    } else {
+      errorElement.innerText = "ERR: No authorized email address associated with user account.";
+    }
+  } catch (err) {
+    errorElement.innerText = "ERR: Failed to connect to email verification service.";
+  }
+}
+
+let pendingUser = null;
+let generatedOTP = null;
+
+function verify2FACode() {
+  const enteredCode = document.getElementById('otpInput').value.trim();
+  const otpError = document.getElementById('otpError');
+
+  if (enteredCode !== generatedOTP) {
+    otpError.innerText = "INVALID PASSCODE: Verification failed.";
+    addAuditLog("2FA_FAILED", `Invalid 2FA code entered for user: '${pendingUser.displayName}'`);
+    return;
+  }
+
+  // 2FA Verified -> Set Active Session
+  currentUser = pendingUser;
+  pendingUser = null;
+  generatedOTP = null;
+
+  document.getElementById('otpModal').classList.add('hidden');
   document.getElementById('currentUserDisplay').innerText = `${currentUser.displayName} (${currentUser.role})`;
   document.getElementById('dashRoleDisplay').innerText = `${currentUser.displayName} [${currentUser.role}]`;
 
-  addAuditLog("LOGIN", `User '${currentUser.displayName}' authenticated with SHA-256.`);
+  addAuditLog("LOGIN", `User '${currentUser.displayName}' authenticated with SHA-256 + 2FA.`);
   applyRBAC();
 
   document.getElementById('loginUser').value = "";
   document.getElementById('loginPass').value = "";
+  document.getElementById('otpInput').value = "";
+  otpError.innerText = "";
 }
+
+
+
 
 function logout() {
   currentUser = null;
@@ -189,7 +235,11 @@ function addAuditLog(action, details) {
   renderAuditLogs();
 
   // Push log entry to Google Sheets
-  syncToCloud("ADD_LOG", logEntry);
+   syncToCloud("ADD_LOG", {
+    user: userName,
+    action: action,
+    details: details
+  });
 }
 
 function renderAuditLogs() {
@@ -247,7 +297,10 @@ function processUpgrade() {
   qtyInput.value = "";
 
   // Sync back to Google Sheets Database
-  syncToCloud("UPDATE_INVENTORY", logEntry);
+  syncToCloud("UPDATE_INVENTORY", {
+  itemKey: itemKey,
+  newQty: inventory[itemKey]
+});
 }
 
 // Process Inventory Restock (Stock In)
@@ -283,7 +336,11 @@ function processRestock() {
   qtyInput.value = "";
 
   // Sync back to Google Sheets Database
-  syncToCloud("UPDATE_INVENTORY", logEntry);
+  // CORRECT: Send itemKey and newQty
+syncToCloud("UPDATE_INVENTORY", {
+  itemKey: itemKey,
+  newQty: inventory[itemKey]
+});
 }
 
 // Threshold definitions for low-stock alerts
