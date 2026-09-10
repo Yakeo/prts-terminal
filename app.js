@@ -60,11 +60,21 @@ async function syncToCloud(actionType, logEntry = null) {
   }
 }
 
+// Brute Force Attack Prevention (IAS101 Security)
+let failedLoginAttempts = 0;
+let isLockedOut = false;
+
 // User Authentication Engine
 function authenticateUser() {
   const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
   const passInput = document.getElementById('loginPass').value.trim();
   const errorElement = document.getElementById('loginError');
+
+  // Check if account login terminal is currently locked out
+  if (isLockedOut) {
+    errorElement.innerText = "SECURITY ALERT: Terminal locked due to repeated brute-force attempts. Try again in 30 seconds.";
+    return;
+  }
 
   if (!userInput || !passInput) {
     errorElement.innerText = "REJECTED: Enter both Personnel ID and Passcode.";
@@ -74,10 +84,31 @@ function authenticateUser() {
   const foundUser = userDatabase.find(u => u.username === userInput && u.pass === passInput);
 
   if (!foundUser) {
-    errorElement.innerText = "ACCESS DENIED: Invalid Personnel ID or Passcode.";
+    failedLoginAttempts++;
+    
+    // Trigger Brute Force Lockout after 3 failed tries
+    if (failedLoginAttempts >= 3) {
+      isLockedOut = true;
+      errorElement.innerText = "SECURITY ALERT: 3 Failed Attempts. TERMINAL LOCKED OUT FOR 30s.";
+      addAuditLog("BRUTE_FORCE_LOCKOUT", `Terminal locked after 3 failed attempts for ID: '${userInput}'`);
+      
+      // Auto-unlock after 30 seconds
+      setTimeout(() => {
+        isLockedOut = false;
+        failedLoginAttempts = 0;
+        if (errorElement) errorElement.innerText = "Terminal unlocked. Please retry credentials.";
+      }, 30000);
+      return;
+    }
+
+    errorElement.innerText = `ACCESS DENIED: Invalid Credentials (${3 - failedLoginAttempts} attempts remaining).`;
     addAuditLog("AUTH_FAILED", `Failed login attempt for ID: '${userInput}'`);
     return;
   }
+
+  // Reset counters on successful login
+  failedLoginAttempts = 0;
+  isLockedOut = false;
 
   currentUser = foundUser;
   errorElement.innerText = "";
@@ -92,6 +123,8 @@ function authenticateUser() {
   document.getElementById('loginUser').value = "";
   document.getElementById('loginPass').value = "";
 }
+
+
 
 function logout() {
   currentUser = null;
