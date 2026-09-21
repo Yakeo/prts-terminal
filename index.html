@@ -369,138 +369,120 @@
       </div>
     </section>
 
-    <!-- 04. OPERATOR UPGRADES VIEW (REDESIGNED) -->
+   <!-- 04. OPERATOR UPGRADES VIEW (MULTI-RESOURCE PROMOTION SYSTEM) -->
 <section id="view-upgrades" class="tab-view hidden max-w-5xl mx-auto space-y-6">
   <div class="border-l-4 border-cyan-400 pl-4 flex justify-between items-end">
     <div>
-      <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operator Promotion & Upgrade</h2>
-      <p class="text-xs text-slate-400">Rhodes Island Human Resources & Tactical Development Unit</p>
+      <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operator Promotion System</h2>
+      <p class="text-xs text-slate-400">Rhodes Island Tactical Development & Elite Advancement Unit</p>
     </div>
-    <span class="text-xs font-mono text-cyan-400 border border-cyan-500/30 px-2 py-1 bg-cyan-950/30">STATUS: READY</span>
+    <span class="text-xs font-mono text-cyan-400 border border-cyan-500/30 px-2 py-1 bg-cyan-950/30">SYS.PROMOTION.v2</span>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
-    <!-- LEFT: OPERATOR PROFILE CARD & STATS -->
+    <!-- LEFT PANEL: OPERATOR CURRENT STATUS & PROFILE -->
     <div class="lg:col-span-1 bg-slate-900/90 prts-border p-5 space-y-4 flex flex-col justify-between">
       <div>
-        <div class="text-[10px] text-cyan-400 font-mono tracking-widest mb-1">// TARGET SELECTION</div>
-        <select id="operatorSelect" onchange="updateOperatorPreview()" class="w-full bg-slate-950 border border-slate-700 text-white p-2.5 font-mono text-sm focus:outline-none focus:border-cyan-400 mb-4">
-          <!-- Options populated dynamically -->
+        <div class="text-[10px] text-cyan-400 font-mono tracking-widest mb-1">// SELECT OPERATOR</div>
+        <select id="operatorSelect" onchange="loadSelectedOperatorProfile()" class="w-full bg-slate-950 border border-slate-700 text-white p-2.5 font-mono text-sm focus:outline-none focus:border-cyan-400 mb-4">
+          <!-- Dynamic Options Populated by JavaScript -->
         </select>
 
-        <!-- Arknights Style Avatar Badge -->
+        <!-- Arknights Style Promotion Preview Card -->
         <div class="relative bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-700 p-4 flex flex-col items-center text-center">
           <div class="absolute top-2 left-2 text-[9px] font-mono text-slate-500 tracking-wider">RHODES_OPERATOR</div>
-          <img id="opPreviewImg" src="https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_002_amiya.png" alt="Operator Preview" class="w-24 h-24 object-cover border-2 border-cyan-400 bg-slate-950 shadow-[0_0_15px_rgba(0,240,255,0.2)] my-2">
           
-          <h3 id="opPreviewName" class="text-xl font-black text-white tracking-wider">Amiya</h3>
-          <p id="opPreviewInfo" class="text-xs text-cyan-400 font-mono">★★★★★ | Caster</p>
+          <img id="opPreviewImg" src="https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_103_angel.png" alt="Operator Portrait" class="w-28 h-28 object-cover border-2 border-cyan-400 bg-slate-950 shadow-[0_0_15px_rgba(0,240,255,0.2)] my-2">
+          
+          <h3 id="opPreviewName" class="text-xl font-black text-white tracking-wider">Exusiai</h3>
+          <p id="opPreviewClass" class="text-xs text-cyan-400 font-mono">★★★★★★ | Sniper</p>
 
-          <!-- Dynamic Operator Stats -->
+          <!-- Dynamic Live Operator Stats -->
           <div class="w-full grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800 text-center">
             <div class="bg-slate-950 p-2 border border-slate-800">
-              <span class="block text-[9px] text-slate-500 uppercase">Phase</span>
+              <span class="block text-[9px] text-slate-500 uppercase">Elite Stage</span>
               <span id="opEliteDisplay" class="text-xs font-bold text-amber-400 font-mono">Elite 1</span>
             </div>
             <div class="bg-slate-950 p-2 border border-slate-800">
-              <span class="block text-[9px] text-slate-500 uppercase">Level</span>
-              <span id="opLevelDisplay" class="text-xs font-bold text-cyan-400 font-mono">Lv. 50</span>
+              <span class="block text-[9px] text-slate-500 uppercase">Current Level</span>
+              <span id="opLevelDisplay" class="text-xs font-bold text-cyan-400 font-mono">Lv. 80</span>
             </div>
             <div class="bg-slate-950 p-2 border border-slate-800">
-              <span class="block text-[9px] text-slate-500 uppercase">Skill</span>
-              <span id="opSkillDisplay" class="text-xs font-bold text-emerald-400 font-mono">Rank 7</span>
+              <span class="block text-[9px] text-slate-500 uppercase">Max Level</span>
+              <span id="opMaxLevelDisplay" class="text-xs font-bold text-slate-400 font-mono">80</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="bg-cyan-950/20 border border-cyan-500/20 p-3 text-[11px] font-mono text-cyan-300">
-        <span class="font-bold uppercase block mb-1">💡 Terminal Notice:</span>
-        Promoting operators increases base stats and unlocks advanced skill trees. Ensure required materials exist in warehouse storage before initiation.
+      <div class="bg-amber-950/20 border border-amber-500/20 p-3 text-[11px] font-mono text-amber-300">
+        <span class="font-bold uppercase block mb-1">⚠️ Requirement Notice:</span>
+        All listed material prerequisites must be fully satisfied in depot stock before initiating operator promotion.
       </div>
     </div>
 
-    <!-- RIGHT: CONSUMPTION REQUISITION FORM -->
+    <!-- RIGHT PANEL: PROMOTION STAGE & MULTI-ITEM REQUIREMENTS -->
     <div class="lg:col-span-2 bg-slate-900/90 prts-border p-6 flex flex-col justify-between space-y-6">
       <div>
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-          <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-widest">// Resource Allocation Matrix</h3>
-          <span class="text-xs font-mono text-slate-500">IAS101 COMPLIANT</span>
+        <!-- Stage Transition Preview (e.g., Elite 1 -> Elite 2) -->
+        <div class="flex items-center justify-between bg-slate-950 p-4 border border-slate-800 mb-6">
+          <div class="text-center">
+            <span class="text-[10px] text-slate-500 uppercase font-mono block">Current Phase</span>
+            <span id="stageCurrent" class="text-lg font-black text-slate-300">Elite 1</span>
+          </div>
+          <div class="text-2xl font-black text-cyan-400 animate-pulse">➔</div>
+          <div class="text-center">
+            <span class="text-[10px] text-cyan-400 uppercase font-mono block">Target Phase</span>
+            <span id="stageTarget" class="text-lg font-black text-amber-400">Elite 2</span>
+          </div>
         </div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs uppercase text-slate-400 mb-1">Required Enhancement Material</label>
-            <select id="itemSelect" class="w-full bg-slate-950 border border-slate-700 p-3 text-white font-mono text-sm focus:outline-none focus:border-cyan-400">
-              <!-- Options populated dynamically -->
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase text-slate-400 mb-1">Consumption Quantity</label>
-            <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-3 text-cyan-400 font-mono text-lg font-bold focus:outline-none focus:border-cyan-400" value="10" min="1">
-          </div>
-
-          <!-- Material Availability Indicator -->
-          <div class="p-4 bg-slate-950 border border-slate-800 space-y-2">
-            <div class="flex justify-between text-xs font-mono">
-              <span class="text-slate-400">Current Depot Stock:</span>
-              <span id="currentMatStockDisplay" class="text-cyan-400 font-bold">Checking...</span>
-            </div>
-            <div class="flex justify-between text-xs font-mono">
-              <span class="text-slate-400">Stock Remaining After Upgrade:</span>
-              <span id="projectedMatStockDisplay" class="text-slate-200">Checking...</span>
-            </div>
-          </div>
+        <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3 font-mono">// REQUIRED MATERIALS FOR PROMOTION</h3>
+        
+        <!-- Multi-Item Requirement Grid (Arknights Style) -->
+        <div id="requiredMaterialsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <!-- Dynamically Rendered Requirement Cards -->
         </div>
       </div>
 
-      <!-- Initiate Action Trigger -->
-      <button onclick="openUpgradeConfirmModal()" class="prts-btn w-full py-4 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-        ⚡ Initiate Operator Upgrade Protocol
+      <!-- Promotion Trigger Button -->
+      <button id="btnInitiatePromotion" onclick="openPromotionModal()" class="prts-btn w-full py-4 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+        ⚡ Promote Operator
       </button>
     </div>
 
   </div>
 </section>
 
-<!-- POPUP MODAL: TACTICAL UPGRADE CONFIRMATION -->
-<div id="upgradeModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+<!-- POPUP MODAL: TACTICAL PROMOTION CONFIRMATION -->
+<div id="promotionModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
   <div class="bg-slate-900 prts-border max-w-md w-full p-6 space-y-6 shadow-2xl relative">
     
     <div class="border-b border-cyan-500/40 pb-3 text-center">
-      <div class="text-[10px] text-cyan-400 font-mono tracking-widest mb-1">RHODES ISLAND TERMINAL // CONFIRMATION</div>
-      <h3 class="text-xl font-black text-white tracking-wider uppercase">Confirm Material Consumption</h3>
+      <div class="text-[10px] text-cyan-400 font-mono tracking-widest mb-1">PRTS // PROMOTION VERIFICATION</div>
+      <h3 id="modalPromoteTitle" class="text-xl font-black text-white tracking-wider uppercase">Promote Exusiai to Elite 2?</h3>
     </div>
 
-    <!-- Modal Detail Breakdown -->
+    <!-- Modal Requirement Checklist Summary -->
     <div class="space-y-3 bg-slate-950 p-4 border border-slate-800 text-xs font-mono">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-slate-400">Target Operator:</span>
-        <span id="modalOpName" class="text-cyan-400 font-bold text-sm">--</span>
+      <div class="text-slate-400 uppercase text-[10px] border-b border-slate-800 pb-1 mb-2">Deduction Breakdown:</div>
+      <div id="modalMaterialsList" class="space-y-2">
+        <!-- Rendered dynamically -->
       </div>
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-slate-400">Resource Deducted:</span>
-        <span id="modalItemName" class="text-amber-400 font-bold">--</span>
-      </div>
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-slate-400">Amount:</span>
-        <span id="modalQty" class="text-red-400 font-bold text-sm">--</span>
-      </div>
-      <div class="flex justify-between items-center pt-1">
-        <span class="text-slate-400">Authorized By:</span>
+      <div class="flex justify-between items-center border-t border-slate-800 pt-2 mt-2">
+        <span class="text-slate-400">Authorized Personnel:</span>
         <span id="modalAuthUser" class="text-emerald-400 font-bold">Doctor</span>
       </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Action Controls -->
     <div class="flex gap-3">
-      <button onclick="closeUpgradeConfirmModal()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs tracking-wider transition">
+      <button onclick="closePromotionModal()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs tracking-wider transition">
         Cancel
       </button>
-      <button onclick="executeConfirmedUpgrade()" class="prts-btn w-1/2 py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-black uppercase text-xs tracking-wider transition">
-        Confirm & Execute
+      <button id="modalConfirmBtn" onclick="executePromotion()" class="prts-btn w-1/2 py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-black uppercase text-xs tracking-wider transition">
+        Confirm Upgrade
       </button>
     </div>
 
