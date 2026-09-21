@@ -450,6 +450,7 @@ function populateOperatorDropdown() {
   loadSelectedOperatorProfile();
 }
 
+// OPERATOR PROFILES & DETAILED EXP BREAKDOWN
 function loadSelectedOperatorProfile() {
   const select = document.getElementById('operatorSelect');
   if (!select) return;
@@ -487,15 +488,25 @@ function loadSelectedOperatorProfile() {
     Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
       let currentStock = 0;
       let isSufficient = false;
+      let expBreakdownText = "";
 
       const safeReqQty = Number(reqQty) || 0;
+      const cleanKey = matKey.toLowerCase().trim();
 
-      if (matKey.toLowerCase() === 'exp') {
+      if (cleanKey === 'exp') {
         const expCheck = calculateOptimalExpCards(safeReqQty);
         currentStock = Number(expCheck.totalAvailableExp) || 0;
         isSufficient = expCheck.success;
+
+        if (expCheck.success && expCheck.cardsToDeduct) {
+          const breakdownParts = Object.entries(expCheck.cardsToDeduct).map(([cardKey, count]) => {
+            return `${count}x ${getItemName(cardKey)}`;
+          });
+          expBreakdownText = breakdownParts.join(', ');
+        }
       } else {
-        currentStock = Number(getItemStock(matKey.toLowerCase())) || 0;
+        // Case-insensitive lookup for LMD and materials
+        currentStock = Number(getItemStock(cleanKey)) || 0;
         isSufficient = currentStock >= safeReqQty;
       }
 
@@ -507,13 +518,17 @@ function loadSelectedOperatorProfile() {
       }`;
 
       card.innerHTML = `
-        <div class="text-[10px] text-slate-400 uppercase truncate mb-1">${matKey.toUpperCase()}</div>
+        <div class="text-[10px] text-slate-400 uppercase truncate mb-1">${getItemName(cleanKey)}</div>
         <div class="text-base font-bold ${isSufficient ? 'text-cyan-400' : 'text-red-400'}">
           ${currentStock.toLocaleString()} / <span class="text-slate-300">${safeReqQty.toLocaleString()}</span>
         </div>
-        <div class="text-[9px] mt-1 ${isSufficient ? 'text-emerald-400' : 'text-red-400'}">
-          ${isSufficient ? '✓ SUFFICIENT' : '✕ INSUFFICIENT'}
-        </div>
+        ${
+          expBreakdownText 
+            ? `<div class="text-[9px] mt-1 text-cyan-300/80 truncate" title="${expBreakdownText}">Using: ${expBreakdownText}</div>`
+            : `<div class="text-[9px] mt-1 ${isSufficient ? 'text-emerald-400' : 'text-red-400'}">
+                ${isSufficient ? '✓ SUFFICIENT' : '✕ INSUFFICIENT'}
+               </div>`
+        }
       `;
       grid.appendChild(card);
     });
@@ -536,6 +551,8 @@ function loadSelectedOperatorProfile() {
     }
   }
 }
+
+// PROMOTION CONFIRMATION MODAL WITH DETAILED CARD DEDUCTION LIST
 function openPromotionModal() {
   const select = document.getElementById('operatorSelect');
   if (!select) return;
@@ -549,14 +566,32 @@ function openPromotionModal() {
   const listContainer = document.getElementById('modalMaterialsList');
   if (listContainer) {
     listContainer.innerHTML = '';
+
     Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
-      const row = document.createElement('div');
-      row.className = "flex justify-between items-center";
-      row.innerHTML = `
-        <span class="text-slate-300 uppercase">${getItemName(matKey.toLowerCase())}:</span>
-        <span class="text-red-400 font-bold">-${reqQty.toLocaleString()}</span>
-      `;
-      listContainer.appendChild(row);
+      const cleanKey = matKey.toLowerCase().trim();
+
+      if (cleanKey === 'exp') {
+        const expCheck = calculateOptimalExpCards(reqQty);
+        if (expCheck.success && expCheck.cardsToDeduct) {
+          Object.entries(expCheck.cardsToDeduct).forEach(([cardKey, count]) => {
+            const row = document.createElement('div');
+            row.className = "flex justify-between items-center text-xs py-1 border-b border-slate-800/50";
+            row.innerHTML = `
+              <span class="text-slate-300">${getItemName(cardKey)}:</span>
+              <span class="text-amber-400 font-bold">-${count} cards</span>
+            `;
+            listContainer.appendChild(row);
+          });
+        }
+      } else {
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center text-xs py-1 border-b border-slate-800/50";
+        row.innerHTML = `
+          <span class="text-slate-300 uppercase">${getItemName(cleanKey)}:</span>
+          <span class="text-red-400 font-bold">-${reqQty.toLocaleString()}</span>
+        `;
+        listContainer.appendChild(row);
+      }
     });
   }
 
