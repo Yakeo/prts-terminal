@@ -26,6 +26,7 @@ const LOW_STOCK_THRESHOLDS = {
 };
 
 // OPERATORS DATABASE WITH PROMOTION STATES & REQUIREMENTS
+// OPERATORS DATABASE (Game-Accurate Arknights Costs & Requirements)
 let OPERATORS = [
   { 
     id: "Amiya", 
@@ -36,7 +37,14 @@ let OPERATORS = [
     elite: 0,
     level: 50,
     maxLevel: 50,
-    requirements: { lmd: 50000, exp: 2000, sugar: 5 }
+    // Elite 0 -> Elite 1: Leveling 1-50 (26,100 EXP / 22,042 LMD) + Promotion Cost (15,000 LMD, 3x Caster Chips, 1x Sugar, 1x Polyhedron)
+    requirements: { 
+      lmd: 37042, 
+      exp: 26100, 
+      caster_chip: 3, 
+      sugar_sub: 1, 
+      polyhedron: 1 
+    }
   },
   { 
     id: "Chen", 
@@ -47,7 +55,14 @@ let OPERATORS = [
     elite: 1,
     level: 80,
     maxLevel: 80,
-    requirements: { lmd: 180000, exp: 10000, sugar: 10 }
+    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Dual Chips, 4x D32 Steel / Polyhedron, 6x Ester)
+    requirements: { 
+      lmd: 513124, 
+      exp: 361400, 
+      guard_chip: 4, 
+      polyhedron: 4, 
+      ester: 6 
+    }
   },
   { 
     id: "Kaltsit", 
@@ -58,7 +73,14 @@ let OPERATORS = [
     elite: 1,
     level: 80,
     maxLevel: 80,
-    requirements: { lmd: 180000, exp: 8000, sugar: 8 }
+    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Medic Dual Chips, 4x Polymerization, 5x Device)
+    requirements: { 
+      lmd: 513124, 
+      exp: 361400, 
+      medic_chip: 4, 
+      device: 5, 
+      sugar: 4 
+    }
   },
   { 
     id: "Exusiai", 
@@ -69,7 +91,14 @@ let OPERATORS = [
     elite: 1,
     level: 80,
     maxLevel: 80,
-    requirements: { lmd: 180000, exp: 7500, sugar: 5 }
+    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Sniper Dual Chips, 5x Sugar Substitute, 4x Oriron)
+    requirements: { 
+      lmd: 513124, 
+      exp: 361400, 
+      sniper_chip: 4, 
+      sugar_sub: 5, 
+      oriron_piece: 4 
+    }
   },
   { 
     id: "Surtr", 
@@ -80,7 +109,14 @@ let OPERATORS = [
     elite: 0,
     level: 50,
     maxLevel: 50,
-    requirements: { lmd: 30000, exp: 1500, sugar: 3 }
+    // Elite 0 -> Elite 1: Leveling 1-50 (32,000 EXP / 27,000 LMD) + Promotion Cost (30,000 LMD, 5x Guard Chips, 8x Diketon, 5x Oriron Shard)
+    requirements: { 
+      lmd: 57000, 
+      exp: 32000, 
+      guard_chip: 5, 
+      ketone_sub: 8, 
+      oriron_piece: 5 
+    }
   },
   { 
     id: "Texas", 
@@ -91,7 +127,14 @@ let OPERATORS = [
     elite: 0,
     level: 50,
     maxLevel: 50,
-    requirements: { lmd: 40000, exp: 1800, sugar: 4 }
+    // Elite 0 -> Elite 1: Leveling 1-50 (26,100 EXP / 22,042 LMD) + Promotion Cost (15,000 LMD, 3x Vanguard Chips, 1x Ester Rock, 1x Sugar)
+    requirements: { 
+      lmd: 37042, 
+      exp: 26100, 
+      vanguard_chip: 3, 
+      rock_sub: 1, 
+      sugar_sub: 1 
+    }
   },
   { 
     id: "Saria", 
@@ -102,10 +145,16 @@ let OPERATORS = [
     elite: 1,
     level: 80,
     maxLevel: 80,
-    requirements: { lmd: 180000, exp: 9000, sugar: 12 }
+    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Defender Dual Chips, 4x Sugar, 5x Device)
+    requirements: { 
+      lmd: 513124, 
+      exp: 361400, 
+      defender_chip: 4, 
+      sugar: 4, 
+      device: 5 
+    }
   }
 ];
-
 document.addEventListener('DOMContentLoaded', () => {
   const savedOperators = localStorage.getItem('prts_operators');
   if (savedOperators) {
@@ -526,17 +575,26 @@ function loadSelectedOperatorProfile() {
 
       if (cleanKey === 'exp') {
         const expCheck = calculateOptimalExpCards(safeReqQty);
-        currentStock = Number(expCheck.totalAvailableExp) || 0;
-        isSufficient = expCheck.success;
-
+        
         if (expCheck.success && expCheck.cardsToDeduct) {
-          const breakdownParts = Object.entries(expCheck.cardsToDeduct).map(([cardKey, count]) => {
-            return `${count}x ${getItemName(cardKey)}`;
+          // Calculate the exact EXP value provided by the selected cards
+          let calculatedExp = 0;
+          const breakdownParts = [];
+
+          Object.entries(expCheck.cardsToDeduct).forEach(([cardKey, count]) => {
+            const cardValue = EXP_VALUES[cardKey] || 0;
+            calculatedExp += count * cardValue;
+            breakdownParts.push(`${count}x ${getItemName(cardKey)}`);
           });
+
+          currentStock = calculatedExp;
+          isSufficient = true;
           expBreakdownText = breakdownParts.join(', ');
+        } else {
+          currentStock = expCheck.totalAvailableExp || 0;
+          isSufficient = false;
         }
       } else {
-        // Case-insensitive lookup for LMD and materials
         currentStock = Number(getItemStock(cleanKey)) || 0;
         isSufficient = currentStock >= safeReqQty;
       }
