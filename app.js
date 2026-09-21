@@ -25,6 +25,7 @@ const LOW_STOCK_THRESHOLDS = {
   sugar: 10
 };
 
+// OPERATORS DATABASE (Game-Accurate Multi-Stage Requirements)
 let OPERATORS = [
   { 
     id: "Amiya", 
@@ -36,20 +37,8 @@ let OPERATORS = [
     level: 50,
     maxLevel: 50,
     promotions: {
-      1: { // Elite 0 -> Elite 1
-        lmd: 37042, 
-        exp: 26100, 
-        chip_caster_1: 3, 
-        sugar_sub: 1, 
-        polyhedron: 1 
-      },
-      2: { // Elite 1 -> Elite 2
-        lmd: 360000, 
-        exp: 240000, 
-        chip_caster_2: 4, 
-        oriron_piece: 4, 
-        ketone_sub: 4 
-      }
+      1: { lmd: 37042, exp: 26100, chip_caster_1: 3, sugar_sub: 1, polyhedron: 1 },
+      2: { lmd: 360000, exp: 240000, chip_caster_2: 4, oriron_piece: 4, ketone_sub: 4 }
     }
   },
   { 
@@ -62,20 +51,36 @@ let OPERATORS = [
     level: 80,
     maxLevel: 80,
     promotions: {
-      1: {
-        lmd: 57000, 
-        exp: 32000, 
-        chip_guard_1: 5, 
-        polyhedron: 5, 
-        sugar_sub: 3 
-      },
-      2: {
-        lmd: 513124, 
-        exp: 361400, 
-        chip_guard_2: 4, 
-        polyhedron: 4, 
-        ester: 6 
-      }
+      1: { lmd: 57000, exp: 32000, chip_guard_1: 5, polyhedron: 5, sugar_sub: 3 },
+      2: { lmd: 513124, exp: 361400, chip_guard_2: 4, polyhedron: 4, ester: 6 }
+    }
+  },
+  { 
+    id: "Kaltsit", 
+    name: "Kal'tsit", 
+    class: "Medic", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_003_kalts.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    promotions: {
+      1: { lmd: 57000, exp: 32000, chip_medic_1: 5, sugar_sub: 5, device: 3 },
+      2: { lmd: 513124, exp: 361400, chip_medic_2: 4, device: 5, sugar: 4 }
+    }
+  },
+  { 
+    id: "Exusiai", 
+    name: "Exusiai", 
+    class: "Sniper", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_103_angel.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    promotions: {
+      1: { lmd: 57000, exp: 32000, chip_sniper_1: 5, sugar_sub: 5, oriron_piece: 3 },
+      2: { lmd: 513124, exp: 361400, chip_sniper_2: 4, sugar_sub: 5, oriron_piece: 4 }
     }
   },
   { 
@@ -88,23 +93,97 @@ let OPERATORS = [
     level: 50,
     maxLevel: 50,
     promotions: {
-      1: {
-        lmd: 57000, 
-        exp: 32000, 
-        chip_guard_1: 5, 
-        ketone_sub: 8, 
-        oriron_piece: 5 
-      },
-      2: {
-        lmd: 513124, 
-        exp: 361400, 
-        chip_guard_2: 4, 
-        polyhedron: 4, 
-        ester: 6 
-      }
+      1: { lmd: 57000, exp: 32000, chip_guard_1: 5, ketone_sub: 8, oriron_piece: 5 },
+      2: { lmd: 513124, exp: 361400, chip_guard_2: 4, polyhedron: 4, ester: 6 }
+    }
+  },
+  { 
+    id: "Texas", 
+    name: "Texas", 
+    class: "Vanguard", 
+    rarity: 5, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_102_texas.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    promotions: {
+      1: { lmd: 37042, exp: 26100, chip_vanguard_1: 3, rock_sub: 1, sugar_sub: 1 },
+      2: { lmd: 360000, exp: 240000, chip_vanguard_2: 4, ester: 5, oriron_piece: 4 }
+    }
+  },
+  { 
+    id: "Saria", 
+    name: "Saria", 
+    class: "Defender", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_202_demhar.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    promotions: {
+      1: { lmd: 57000, exp: 32000, chip_defender_1: 5, rock_sub: 5, sugar_sub: 3 },
+      2: { lmd: 513124, exp: 361400, chip_defender_2: 4, sugar: 4, device: 5 }
+    }
+  },
+  { 
+    id: "Angelina", 
+    name: "Angelina", 
+    class: "Supporter", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_291_aglina.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    promotions: {
+      1: { lmd: 57000, exp: 32000, chip_supporter_1: 5, rock_sub: 5, ester: 3 },
+      2: { lmd: 513124, exp: 361400, chip_supporter_2: 4, ketone_sub: 7, oriron_piece: 4 }
+    }
+  },
+  { 
+    id: "Scene", 
+    name: "Scene", 
+    class: "Supporter", 
+    rarity: 5, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_333_sinto.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    promotions: {
+      1: { lmd: 37042, exp: 26100, chip_supporter_1: 3, device: 2, ester: 2 },
+      2: { lmd: 360000, exp: 240000, chip_supporter_2: 4, sugar: 5, polyhedron: 3 }
+    }
+  },
+  { 
+    id: "Bibeak", 
+    name: "Bibeak", 
+    class: "Guard", 
+    rarity: 5, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_252_bibak.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    promotions: {
+      1: { lmd: 37042, exp: 26100, chip_guard_1: 3, ketone_sub: 2, rock_sub: 2 },
+      2: { lmd: 360000, exp: 240000, chip_guard_2: 4, oriron_piece: 4, ester: 5 }
+    }
+  },
+  { 
+    id: "Shu", 
+    name: "Shu", 
+    class: "Supporter", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_4116_blkshp.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    promotions: {
+      1: { lmd: 57000, exp: 32000, chip_supporter_1: 5, polyhedron: 4, sugar_sub: 3 },
+      2: { lmd: 513124, exp: 361400, chip_supporter_2: 4, device: 4, ketone_sub: 5 }
     }
   }
 ];
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const savedOperators = localStorage.getItem('prts_operators');
   if (savedOperators) {
