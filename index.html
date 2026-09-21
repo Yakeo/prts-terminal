@@ -344,30 +344,111 @@
     </section>
 
     <!-- 03. RESTOCK VIEW (STOCK IN) -->
-    <section id="view-restock" class="tab-view hidden max-w-4xl mx-auto space-y-6">
-      <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operation Restock</h2>
-        <p class="text-xs text-slate-400">Add materials acquired from operations</p>
-      </div>
-      <div class="bg-slate-900/80 p-6 prts-border space-y-4 max-w-md">
+    <section id="view-restock" class="tab-view hidden max-w-5xl mx-auto space-y-6">
+  <!-- Header -->
+  <div class="border-l-4 border-emerald-400 pl-4 py-1">
+    <h1 class="text-2xl font-black text-slate-100 tracking-wider font-mono">OPERATION RESTOCK</h1>
+    <p class="text-xs text-slate-400 font-mono">LOGISTICS DEPOT // INBOUND MATERIAL ACQUISITION</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- LEFT PANEL: Restock Control Form -->
+    <div class="lg:col-span-7 bg-slate-900/80 border border-slate-800 p-6 relative overflow-hidden shadow-2xl prts-border">
+      <!-- Decorative UI Corner Brackets -->
+      <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-400"></div>
+      <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-400"></div>
+
+      <h2 class="text-xs font-mono font-bold text-emerald-400 tracking-widest uppercase mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        // Restock Manifest Selection
+      </h2>
+
+      <form id="restockForm" onsubmit="event.preventDefault(); processRestock();" class="space-y-5">
+        <!-- Item Selection Dropdown -->
         <div>
-          <label class="block text-xs uppercase text-slate-400 mb-1">Select Item to Restock</label>
-          <select id="restockItem" class="w-full bg-slate-950 border border-slate-700 p-2 text-white">
+          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-2">Select Item to Restock</label>
+          <select id="restockItem" onchange="updateRestockItemPreview()" 
+            class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 text-slate-200 font-mono text-sm p-3 outline-none transition-all">
             <option value="lmd">LMD (Currency)</option>
             <option value="exp">Battle Record (EXP)</option>
             <option value="sugar">Sugar Pack</option>
           </select>
         </div>
-        <div>
-          <label class="block text-xs uppercase text-slate-400 mb-1">Amount Acquired</label>
-          <input type="number" id="restockQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="100" min="1">
+
+        <!-- Selected Item Live Stats Preview -->
+        <div id="restockItemPreview" class="p-4 bg-slate-950/60 border border-slate-800/80 flex items-center justify-between font-mono">
+          <div>
+            <div id="previewItemCategory" class="text-[10px] text-emerald-400/80 uppercase tracking-widest">LOGISTICS MATERIAL</div>
+            <div id="previewItemName" class="text-base font-bold text-slate-100">LMD (Currency)</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-slate-500 uppercase">Current Stock</div>
+            <div id="previewItemCurrentStock" class="text-lg font-bold text-cyan-400">0</div>
+          </div>
         </div>
-        <button onclick="processRestock()" class="prts-btn w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest uppercase transition">
-          Add Stock
+
+        <!-- Amount Input + Quick Presets -->
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-2">Amount Acquired</label>
+          <div class="flex gap-2">
+            <input type="number" id="restockQty" min="1" value="100" oninput="updateRestockProjection()"
+              class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 text-slate-100 font-mono text-lg p-3 outline-none transition-all" required />
+          </div>
+          
+          <!-- Presets -->
+          <div class="grid grid-cols-4 gap-2 mt-2">
+            <button type="button" onclick="setRestockAmount(1)" class="py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono text-xs transition-colors">+1</button>
+            <button type="button" onclick="setRestockAmount(10)" class="py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono text-xs transition-colors">+10</button>
+            <button type="button" onclick="setRestockAmount(50)" class="py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono text-xs transition-colors">+50</button>
+            <button type="button" onclick="setRestockAmount(100)" class="py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono text-xs transition-colors">+100</button>
+          </div>
+        </div>
+
+        <!-- Projected New Stock Total -->
+        <div class="p-3 bg-emerald-950/20 border border-emerald-500/30 flex justify-between items-center font-mono text-xs">
+          <span class="text-slate-400">Projected Depot Balance:</span>
+          <span id="projectedStockDisplay" class="text-emerald-400 font-bold text-sm">100</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnSubmitRestock"
+          class="prts-btn w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black font-mono text-sm tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] flex justify-center items-center gap-2">
+          <span>⚡ CONFIRM RESTOCK DISPATCH</span>
         </button>
-        <div id="restockMsg" class="text-xs font-mono text-slate-500 min-h-[1.5rem]"></div>
+
+        <div id="restockMsg" class="text-xs font-mono text-slate-500 min-h-[1.5rem] text-center"></div>
+      </form>
+    </div>
+
+    <!-- RIGHT PANEL: Depot Status Summary -->
+    <div class="lg:col-span-5 bg-slate-900/80 border border-slate-800 p-6 relative flex flex-col justify-between prts-border">
+      <div>
+        <h2 class="text-xs font-mono font-bold text-slate-400 tracking-widest uppercase mb-4 flex items-center justify-between">
+          <span>// DEPOT RECEIVING STATUS</span>
+          <span class="text-[10px] text-emerald-400/70 font-normal">ONLINE</span>
+        </h2>
+
+        <div class="space-y-4 font-mono text-xs">
+          <div class="p-3 bg-slate-950 border border-slate-800">
+            <div class="text-slate-500 text-[10px]">AUTHORIZED DISPATCHER</div>
+            <div class="text-cyan-400 font-bold mt-1">Rhodes Island Logistics Unit</div>
+          </div>
+          <div class="p-3 bg-slate-950 border border-slate-800">
+            <div class="text-slate-500 text-[10px]">SYNC METHOD</div>
+            <div class="text-emerald-400 font-bold mt-1">Google Sheets API (Realtime)</div>
+          </div>
+        </div>
       </div>
-    </section>
+
+      <div class="mt-6 pt-4 border-t border-slate-800/80 text-[10px] font-mono text-slate-500 flex justify-between items-center">
+        <span>PRTS SYS.4.2</span>
+        <span class="text-emerald-400">SYNCED</span>
+      </div>
+    </div>
+
+  </div>
+</section>
 
    <!-- 04. OPERATOR UPGRADES VIEW (MULTI-RESOURCE PROMOTION SYSTEM) -->
 <section id="view-upgrades" class="tab-view hidden max-w-5xl mx-auto space-y-6">
