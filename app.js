@@ -478,7 +478,7 @@ function switchTab(tabId) {
   if (activeBtn) {
     activeBtn.classList.add('active');
   }
-}
+
   const views = document.querySelectorAll('.tab-view');
   views.forEach(view => view.classList.add('hidden'));
 
