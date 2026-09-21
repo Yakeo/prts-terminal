@@ -835,3 +835,61 @@ function toggleRegisterModal(show) {
     loginModal.classList.remove('hidden');
   }
 }
+// Populate Restock Dropdown and sync initial preview
+function populateRestockDropdown() {
+  const select = document.getElementById('restockItemSelect');
+  if (!select || !inventory) return;
+
+  select.innerHTML = '';
+  Object.keys(inventory).forEach(key => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.innerText = `${getItemName(key)} (${key})`;
+    select.appendChild(opt);
+  });
+
+  updateRestockItemPreview();
+}
+
+// Live update of selected item stats
+function updateRestockItemPreview() {
+  const select = document.getElementById('restockItemSelect');
+  if (!select) return;
+
+  const itemKey = select.value;
+  const currentStock = getItemStock(itemKey);
+
+  const nameElem = document.getElementById('previewItemName');
+  const catElem = document.getElementById('previewItemCategory');
+  const stockElem = document.getElementById('previewItemCurrentStock');
+
+  if (nameElem) nameElem.innerText = getItemName(itemKey);
+  if (catElem) catElem.innerText = itemKey.includes('chip') ? 'CHIP MATERIAL' : itemKey.includes('exp') ? 'EXP RECORD' : 'DEVELOPMENT MATERIAL';
+  if (stockElem) stockElem.innerText = currentStock.toLocaleString();
+
+  updateRestockProjection();
+}
+
+// Quick amount preset buttons
+function setRestockAmount(amt) {
+  const input = document.getElementById('restockAmount');
+  if (input) {
+    input.value = amt;
+    updateRestockProjection();
+  }
+}
+
+// Calculate projected new total
+function updateRestockProjection() {
+  const select = document.getElementById('restockItemSelect');
+  const input = document.getElementById('restockAmount');
+  const display = document.getElementById('projectedStockDisplay');
+
+  if (!select || !input || !display) return;
+
+  const currentStock = getItemStock(select.value);
+  const addAmount = Number(input.value) || 0;
+  const newTotal = currentStock + addAmount;
+
+  display.innerText = `${currentStock.toLocaleString()} → ${newTotal.toLocaleString()}`;
+}
