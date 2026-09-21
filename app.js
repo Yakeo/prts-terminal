@@ -451,13 +451,34 @@ function applyRBAC() {
   }
 }
 
-// TAB NAVIGATION
-function switchTab(tabName) {
-  if (currentUser?.role === 'Read-Only' && ['restock', 'upgrades', 'logs'].includes(tabName)) {
-    alert("ACCESS DENIED: Read-Only personnel clearance level insufficient.");
+function switchTab(tabId) {
+  const userRole = currentUser?.role || 'Operator';
+
+  // Define tabs blocked for standard Operators / Read-Only users
+  const adminOnlyTabs = ['restock', 'upgrades', 'logs', 'rbac', 'settings'];
+
+  // Block access if user is Operator or Read-Only trying to enter protected tabs
+  if ((userRole === 'Operator' || userRole === 'Read-Only') && adminOnlyTabs.includes(tabId)) {
+    alert("ACCESS DENIED: Insufficient Security Clearance for " + tabId.toUpperCase());
     return;
   }
 
+  // Hide all views
+  document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+  
+  // Show target view
+  const targetView = document.getElementById(`view-${tabId}`);
+  if (targetView) {
+    targetView.classList.remove('hidden');
+  }
+
+  // Update nav active states
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+  }
+}
   const views = document.querySelectorAll('.tab-view');
   views.forEach(view => view.classList.add('hidden'));
 
