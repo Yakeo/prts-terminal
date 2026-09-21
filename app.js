@@ -649,20 +649,70 @@ function closePromotionModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function executePromotion() {
-  if (currentUser && currentUser.role === "Read-Only") return;
-
+// EXECUTE OPERATOR PROMOTION & DEDUCT INVENTORY
+async function executePromotion() {
   const select = document.getElementById('operatorSelect');
   if (!select) return;
 
   const op = OPERATORS.find(o => o.id === select.value);
   if (!op) return;
 
-  const expCheck = calculateOptimalExpCards(op.requirements.exp);
-  if (!expCheck.success) {
-    alert(`INSUFFICIENT EXP: Need ${op.requirements.exp} EXP, but only ${expCheck.totalAvailableExp} EXP available across all cards.`);
+  const nextStage = op.elite + 1;
+  // Fall back to op.requirements if promotions object isn't present
+  const targetReqs = op.promotions ? op.promotions[nextStage] : op.requirements;
+
+  if (!targetReqs) {
+    alert("No promotion requirements found for this operator stage.");
     return;
   }
+
+  // Disable button during execution
+  const confirmBtn = document.getElementById('btnConfirmModalUpgrade');
+  if (confirmBtn) {
+    confirmBtn.disabled = true;
+    confirmBtn.innerText = "PROCESSING DISPATCH...";
+  }
+
+  try {
+    // 1. Process Material Deductions
+    for (const [matKey, reqQty] of Object.entries(targetReqs)) {
+      const cleanKey = matKey.toLowerCase().trim();
+      const safeReqQty = Number(reqQty) || 0;
+
+      if (cleanKey === 'exp') {
+        const expCheck = calculateOptimalExpCards(safeReqQty);
+        if (expCheck.success && expCheck.cardsToDeduct) {
+          for (const [cardKey, cardCount] of Object.entries(expCheck.cardsToDeduct)) {
+            await updateInventoryStock(cardKey, -cardCount);
+          }
+        }
+      } else {
+        await updateInventoryStock(cleanKey, -safeReqQty);
+      }
+    }
+
+    // 2. Advance Operator Elite Stage & Reset Level / MaxLevel
+    op.elite = nextStage;
+    op.level = 1;
+    op.maxLevel = op.elite === 1 ? 70 : 90;
+
+    // 3. UI Cleanup & Refresh
+    closePromotionModal();
+    loadSelectedOperatorProfile();
+    if (typeof renderWarehouse === 'function') renderWarehouse();
+    if (typeof renderDashboard === 'function') renderDashboard();
+
+    alert(`SUCCESS: ${op.name} promoted to Elite ${op.elite}! Depot inventory updated.`);
+  } catch (err) {
+    console.error("Promotion Error:", err);
+    alert("An error occurred during promotion processing. Check console for details.");
+  } finally {
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerText = "CONFIRM UPGRADE";
+    }
+  }
+}
 
   // 1. Deduct standard materials
   Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
