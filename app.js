@@ -279,14 +279,15 @@ async function fetchCloudData() {
   }
 }
 
-// SYNC TO CLOUD
-async function syncToCloud(actionType, payloadData) {
+
+async function syncToCloud(action, payloadData) {
   try {
     await fetch(API_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
-        actionType: actionType,
+        action: action,
         ...payloadData
       })
     });
