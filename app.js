@@ -626,3 +626,41 @@ async function registerUser() {
     regError.innerText = "ERR: Failed to connect to core database.";
   }
 }
+// Open Upgrade Confirmation Popup Modal
+function openUpgradeConfirmModal() {
+  const opSelect = document.getElementById('operatorSelect');
+  const itemSelect = document.getElementById('itemSelect');
+  const qtyInput = document.getElementById('deductQty');
+
+  const selectedOp = opSelect.options[opSelect.selectedIndex]?.text || 'Operator';
+  const selectedItem = itemSelect.options[itemSelect.selectedIndex]?.text || 'Material';
+  const qty = parseInt(qtyInput.value) || 0;
+
+  if (qty <= 0) {
+    alert("Please enter a valid quantity greater than zero.");
+    return;
+  }
+
+  // Populate Modal Fields
+  document.getElementById('modalOpName').innerText = selectedOp;
+  document.getElementById('modalItemName').innerText = selectedItem;
+  document.getElementById('modalQty').innerText = `-${qty}`;
+  document.getElementById('modalAuthUser').innerText = currentUser ? currentUser.username : 'Authorized User';
+
+  // Show Modal
+  document.getElementById('upgradeModal').classList.remove('hidden');
+}
+
+// Close Modal
+function closeUpgradeConfirmModal() {
+  document.getElementById('upgradeModal').classList.add('hidden');
+}
+
+// Execute the upgrade process from modal
+function executeConfirmedUpgrade() {
+  closeUpgradeConfirmModal();
+  // Triggers existing upgrade function logic
+  if (typeof processUpgrade === 'function') {
+    processUpgrade();
+  }
+}
