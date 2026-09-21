@@ -991,3 +991,47 @@ function updateRestockProjection() {
 
   display.innerText = `${currentStock.toLocaleString()} → ${newTotal.toLocaleString()}`;
 }
+// PERSONNEL REGISTRATION LOGIC
+async function registerUser() {
+  const username = document.getElementById('regUser')?.value.trim().toLowerCase();
+  const displayName = document.getElementById('regName')?.value.trim();
+  const email = document.getElementById('regEmail')?.value.trim();
+  const pass = document.getElementById('regPass')?.value.trim();
+  const role = document.getElementById('regRole')?.value || 'Operator';
+  const regMsg = document.getElementById('regError') || document.getElementById('regMsg');
+
+  if (!username || !displayName || !email || !pass) {
+    if (regMsg) regMsg.innerText = "ERR: Please fill in all registration fields.";
+    return;
+  }
+
+  // Check if username already exists locally
+  if (userDatabase.some(u => u.username === username)) {
+    if (regMsg) regMsg.innerText = "ERR: Personnel ID already registered.";
+    return;
+  }
+
+  const hashedPassword = await hashPassword(pass);
+  const newUser = {
+    username,
+    displayName,
+    email,
+    pass: hashedPassword,
+    role
+  };
+
+  userDatabase.push(newUser);
+
+  // Sync new user to Google Sheets
+  await syncToCloud("CREATE_USER", newUser);
+
+  addAuditLog("REGISTER_USER", `Created new profile for '${displayName}' (${role}).`);
+
+  if (regMsg) regMsg.innerText = "SUCCESS: Profile created. You may now log in.";
+
+  // Clear inputs and close registration modal
+  setTimeout(() => {
+    toggleRegisterModal(false);
+    if (regMsg) regMsg.innerText = "";
+  }, 1500);
+}
