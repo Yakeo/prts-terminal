@@ -116,6 +116,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // RESTORE SAVED USER SESSION ON REFRESH
+  const savedSession = localStorage.getItem('prts_session_user');
+  if (savedSession) {
+    try {
+      currentUser = JSON.parse(savedSession);
+      
+      // Auto-hide login modals
+      const loginModal = document.getElementById('loginModal');
+      if (loginModal) loginModal.classList.add('hidden');
+
+      // Update UI displays
+      const userDisplay = document.getElementById('currentUserDisplay');
+      const roleDisplay = document.getElementById('dashRoleDisplay');
+      if (userDisplay) userDisplay.innerText = `${currentUser.displayName} (${currentUser.role})`;
+      if (roleDisplay) roleDisplay.innerText = `${currentUser.displayName} [${currentUser.role}]`;
+
+      applyRBAC();
+    } catch (e) {
+      console.error("Failed to restore session", e);
+      localStorage.removeItem('prts_session_user');
+    }
+  }
+
   fetchCloudData();
   populateOperatorDropdown();
 
@@ -279,7 +302,11 @@ function verify2FACode() {
   pendingUser = null;
   generatedOTP = null;
 
+  // SAVE SESSION TO LOCAL STORAGE
+  localStorage.setItem('prts_session_user', JSON.stringify(currentUser));
+
   document.getElementById('otpModal').classList.add('hidden');
+  document.getElementById('loginModal').classList.add('hidden');
   document.getElementById('currentUserDisplay').innerText = `${currentUser.displayName} (${currentUser.role})`;
   document.getElementById('dashRoleDisplay').innerText = `${currentUser.displayName} [${currentUser.role}]`;
 
@@ -294,7 +321,11 @@ function verify2FACode() {
 
 function logout() {
   currentUser = null;
-  document.getElementById('loginModal').classList.remove('hidden');
+  localStorage.removeItem('prts_session_user'); // CLEAR SAVED SESSION
+  
+  const loginModal = document.getElementById('loginModal');
+  if (loginModal) loginModal.classList.remove('hidden');
+  
   document.getElementById('currentUserDisplay').innerText = "UNAUTHENTICATED";
   document.getElementById('dashRoleDisplay').innerText = "None";
 }
