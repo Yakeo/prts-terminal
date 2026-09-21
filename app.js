@@ -968,10 +968,12 @@ function updateRestockItemPreview() {
   updateRestockProjection();
 }
 
+// Fixed implementation (Adds continuously)
 function setRestockAmount(amt) {
   const input = document.getElementById('restockAmount') || document.getElementById('restockQty');
   if (input) {
-    input.value = amt;
+    const currentVal = parseInt(input.value, 10) || 0;
+    input.value = currentVal + amt;
     updateRestockProjection();
   }
 }
