@@ -1075,3 +1075,19 @@ async function registerUser() {
     if (regMsg) regMsg.innerText = "";
   }, 1500);
 }
+function updateUIForRole(role) {
+  const restrictedTabs = ['nav-restock', 'nav-upgrades']; // Add ID tags to navigation buttons if needed
+  const isRestricted = (role === 'Operator' || role === 'Read-Only');
+
+  // Dynamically disable or hide elements in the sidebar
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const tabName = btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    if (isRestricted && ['restock', 'upgrades', 'logs', 'rbac', 'settings'].includes(tabName)) {
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+    } else {
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+  });
+}
