@@ -465,7 +465,7 @@ function switchTab(tabId) {
 
   // Hide all views
   document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
-  
+
   // Show target view
   const targetView = document.getElementById(`view-${tabId}`);
   if (targetView) {
@@ -478,20 +478,7 @@ function switchTab(tabId) {
   if (activeBtn) {
     activeBtn.classList.add('active');
   }
-
-  const views = document.querySelectorAll('.tab-view');
-  views.forEach(view => view.classList.add('hidden'));
-
-  const activeView = document.getElementById(`view-${tabName}`);
-  if (activeView) activeView.classList.remove('hidden');
-
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = document.querySelector(`button[onclick*='${tabName}']`);
-  if (activeBtn) activeBtn.classList.add('active');
-
-  updateAllDisplays();
 }
-
 // DROPDOWNS & UI RENDERING
 function populateItemDropdowns() {
   const itemKeys = Object.keys(inventory);
