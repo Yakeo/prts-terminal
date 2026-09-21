@@ -25,8 +25,6 @@ const LOW_STOCK_THRESHOLDS = {
   sugar: 10
 };
 
-// OPERATORS DATABASE WITH PROMOTION STATES & REQUIREMENTS
-// OPERATORS DATABASE (Game-Accurate Arknights Costs & Requirements)
 let OPERATORS = [
   { 
     id: "Amiya", 
@@ -37,13 +35,21 @@ let OPERATORS = [
     elite: 0,
     level: 50,
     maxLevel: 50,
-    // Elite 0 -> Elite 1: Leveling 1-50 (26,100 EXP / 22,042 LMD) + Promotion Cost (15,000 LMD, 3x Caster Chips, 1x Sugar, 1x Polyhedron)
-    requirements: { 
-      lmd: 37042, 
-      exp: 26100, 
-      caster_chip: 3, 
-      sugar_sub: 1, 
-      polyhedron: 1 
+    promotions: {
+      1: { // Elite 0 -> Elite 1
+        lmd: 37042, 
+        exp: 26100, 
+        chip_caster_1: 3, 
+        sugar_sub: 1, 
+        polyhedron: 1 
+      },
+      2: { // Elite 1 -> Elite 2
+        lmd: 360000, 
+        exp: 240000, 
+        chip_caster_2: 4, 
+        oriron_piece: 4, 
+        ketone_sub: 4 
+      }
     }
   },
   { 
@@ -55,49 +61,21 @@ let OPERATORS = [
     elite: 1,
     level: 80,
     maxLevel: 80,
-    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Dual Chips, 4x D32 Steel / Polyhedron, 6x Ester)
-    requirements: { 
-      lmd: 513124, 
-      exp: 361400, 
-      guard_chip: 4, 
-      polyhedron: 4, 
-      ester: 6 
-    }
-  },
-  { 
-    id: "Kaltsit", 
-    name: "Kal'tsit", 
-    class: "Medic", 
-    rarity: 6, 
-    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_003_kalts.png",
-    elite: 1,
-    level: 80,
-    maxLevel: 80,
-    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Medic Dual Chips, 4x Polymerization, 5x Device)
-    requirements: { 
-      lmd: 513124, 
-      exp: 361400, 
-      medic_chip: 4, 
-      device: 5, 
-      sugar: 4 
-    }
-  },
-  { 
-    id: "Exusiai", 
-    name: "Exusiai", 
-    class: "Sniper", 
-    rarity: 6, 
-    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_103_angel.png",
-    elite: 1,
-    level: 80,
-    maxLevel: 80,
-    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Sniper Dual Chips, 5x Sugar Substitute, 4x Oriron)
-    requirements: { 
-      lmd: 513124, 
-      exp: 361400, 
-      sniper_chip: 4, 
-      sugar_sub: 5, 
-      oriron_piece: 4 
+    promotions: {
+      1: {
+        lmd: 57000, 
+        exp: 32000, 
+        chip_guard_1: 5, 
+        polyhedron: 5, 
+        sugar_sub: 3 
+      },
+      2: {
+        lmd: 513124, 
+        exp: 361400, 
+        chip_guard_2: 4, 
+        polyhedron: 4, 
+        ester: 6 
+      }
     }
   },
   { 
@@ -109,49 +87,21 @@ let OPERATORS = [
     elite: 0,
     level: 50,
     maxLevel: 50,
-    // Elite 0 -> Elite 1: Leveling 1-50 (32,000 EXP / 27,000 LMD) + Promotion Cost (30,000 LMD, 5x Guard Chips, 8x Diketon, 5x Oriron Shard)
-    requirements: { 
-      lmd: 57000, 
-      exp: 32000, 
-      guard_chip: 5, 
-      ketone_sub: 8, 
-      oriron_piece: 5 
-    }
-  },
-  { 
-    id: "Texas", 
-    name: "Texas", 
-    class: "Vanguard", 
-    rarity: 5, 
-    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_102_texas.png",
-    elite: 0,
-    level: 50,
-    maxLevel: 50,
-    // Elite 0 -> Elite 1: Leveling 1-50 (26,100 EXP / 22,042 LMD) + Promotion Cost (15,000 LMD, 3x Vanguard Chips, 1x Ester Rock, 1x Sugar)
-    requirements: { 
-      lmd: 37042, 
-      exp: 26100, 
-      vanguard_chip: 3, 
-      rock_sub: 1, 
-      sugar_sub: 1 
-    }
-  },
-  { 
-    id: "Saria", 
-    name: "Saria", 
-    class: "Defender", 
-    rarity: 6, 
-    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_202_demhar.png",
-    elite: 1,
-    level: 80,
-    maxLevel: 80,
-    // Elite 1 -> Elite 2: Leveling 1-80 (361,400 EXP / 333,124 LMD) + Promotion Cost (180,000 LMD, 4x Defender Dual Chips, 4x Sugar, 5x Device)
-    requirements: { 
-      lmd: 513124, 
-      exp: 361400, 
-      defender_chip: 4, 
-      sugar: 4, 
-      device: 5 
+    promotions: {
+      1: {
+        lmd: 57000, 
+        exp: 32000, 
+        chip_guard_1: 5, 
+        ketone_sub: 8, 
+        oriron_piece: 5 
+      },
+      2: {
+        lmd: 513124, 
+        exp: 361400, 
+        chip_guard_2: 4, 
+        polyhedron: 4, 
+        ester: 6 
+      }
     }
   }
 ];
@@ -564,8 +514,12 @@ function loadSelectedOperatorProfile() {
   grid.innerHTML = '';
   let hasEnoughMaterials = true;
 
-  if (op.requirements) {
-    Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+  // Dynamically resolve target promotion requirements
+  const nextStage = op.elite + 1;
+  const targetReqs = op.promotions ? op.promotions[nextStage] : op.requirements;
+
+  if (targetReqs) {
+    Object.entries(targetReqs).forEach(([matKey, reqQty]) => {
       let currentStock = 0;
       let isSufficient = false;
       let expBreakdownText = "";
@@ -575,9 +529,8 @@ function loadSelectedOperatorProfile() {
 
       if (cleanKey === 'exp') {
         const expCheck = calculateOptimalExpCards(safeReqQty);
-        
+
         if (expCheck.success && expCheck.cardsToDeduct) {
-          // Calculate the exact EXP value provided by the selected cards
           let calculatedExp = 0;
           const breakdownParts = [];
 
@@ -641,7 +594,7 @@ function loadSelectedOperatorProfile() {
   }
 }
 
-// PROMOTION CONFIRMATION MODAL WITH DETAILED CARD DEDUCTION LIST
+// PROMOTION CONFIRMATION MODAL WITH MULTI-STAGE REQS SUPPORT
 function openPromotionModal() {
   const select = document.getElementById('operatorSelect');
   if (!select) return;
@@ -649,14 +602,17 @@ function openPromotionModal() {
   const op = OPERATORS.find(o => o.id === select.value);
   if (!op) return;
 
+  const nextStage = op.elite + 1;
+  const targetReqs = op.promotions ? op.promotions[nextStage] : op.requirements;
+
   const titleElem = document.getElementById('modalPromoteTitle') || document.getElementById('modalOpName');
-  if (titleElem) titleElem.innerText = `Promote ${op.name} to Elite ${op.elite + 1}`;
+  if (titleElem) titleElem.innerText = `Promote ${op.name} to Elite ${nextStage}`;
 
   const listContainer = document.getElementById('modalMaterialsList');
-  if (listContainer) {
+  if (listContainer && targetReqs) {
     listContainer.innerHTML = '';
 
-    Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+    Object.entries(targetReqs).forEach(([matKey, reqQty]) => {
       const cleanKey = matKey.toLowerCase().trim();
 
       if (cleanKey === 'exp') {
