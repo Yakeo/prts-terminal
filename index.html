@@ -369,67 +369,143 @@
       </div>
     </section>
 
-    <!-- 04. OPERATOR UPGRADES VIEW (STOCK OUT) -->
-    <section id="view-upgrades" class="tab-view hidden max-w-4xl mx-auto space-y-6">
-      <div class="border-l-4 border-cyan-400 pl-4">
-        <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operator Upgrade Protocol</h2>
-        <p class="text-xs text-slate-400">Deduct resources directly from inventory storage</p>
-      </div>
+    <!-- 04. OPERATOR UPGRADES VIEW (REDESIGNED) -->
+<section id="view-upgrades" class="tab-view hidden max-w-5xl mx-auto space-y-6">
+  <div class="border-l-4 border-cyan-400 pl-4 flex justify-between items-end">
+    <div>
+      <h2 class="text-2xl font-bold uppercase text-white tracking-widest">Operator Promotion & Upgrade</h2>
+      <p class="text-xs text-slate-400">Rhodes Island Human Resources & Tactical Development Unit</p>
+    </div>
+    <span class="text-xs font-mono text-cyan-400 border border-cyan-500/30 px-2 py-1 bg-cyan-950/30">STATUS: READY</span>
+  </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-slate-900/80 p-6 prts-border space-y-4">
-          <div>
-            <label class="block text-xs uppercase text-slate-400 mb-1">Target Operator</label>
-            <!-- Operator Visual Preview Card -->
-            <div class="flex items-center gap-4 bg-slate-950 p-3 border border-slate-800 mb-4">
-              <img id="opPreviewImg" src="https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_002_amiya.png" alt="Operator Preview" class="w-14 h-14 object-cover border border-cyan-500/40 bg-slate-900">
-              <div>
-                <p id="opPreviewName" class="text-sm font-bold text-white">Amiya</p>
-                <p id="opPreviewInfo" class="text-xs text-cyan-400 font-mono">★★★★★ | Caster</p>
-              </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- LEFT: OPERATOR PROFILE CARD & STATS -->
+    <div class="lg:col-span-1 bg-slate-900/90 prts-border p-5 space-y-4 flex flex-col justify-between">
+      <div>
+        <div class="text-[10px] text-cyan-400 font-mono tracking-widest mb-1">// TARGET SELECTION</div>
+        <select id="operatorSelect" onchange="updateOperatorPreview()" class="w-full bg-slate-950 border border-slate-700 text-white p-2.5 font-mono text-sm focus:outline-none focus:border-cyan-400 mb-4">
+          <!-- Options populated dynamically -->
+        </select>
+
+        <!-- Arknights Style Avatar Badge -->
+        <div class="relative bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-700 p-4 flex flex-col items-center text-center">
+          <div class="absolute top-2 left-2 text-[9px] font-mono text-slate-500 tracking-wider">RHODES_OPERATOR</div>
+          <img id="opPreviewImg" src="https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_002_amiya.png" alt="Operator Preview" class="w-24 h-24 object-cover border-2 border-cyan-400 bg-slate-950 shadow-[0_0_15px_rgba(0,240,255,0.2)] my-2">
+          
+          <h3 id="opPreviewName" class="text-xl font-black text-white tracking-wider">Amiya</h3>
+          <p id="opPreviewInfo" class="text-xs text-cyan-400 font-mono">★★★★★ | Caster</p>
+
+          <!-- Dynamic Operator Stats -->
+          <div class="w-full grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800 text-center">
+            <div class="bg-slate-950 p-2 border border-slate-800">
+              <span class="block text-[9px] text-slate-500 uppercase">Phase</span>
+              <span id="opEliteDisplay" class="text-xs font-bold text-amber-400 font-mono">Elite 1</span>
             </div>
-            <select id="operatorSelect" onchange="updateOperatorPreview()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 p-2.5 rounded-none font-mono text-sm focus:outline-none focus:border-cyan-500">
-              <!-- Dynamic options populated by app.js -->
-            </select>
+            <div class="bg-slate-950 p-2 border border-slate-800">
+              <span class="block text-[9px] text-slate-500 uppercase">Level</span>
+              <span id="opLevelDisplay" class="text-xs font-bold text-cyan-400 font-mono">Lv. 50</span>
+            </div>
+            <div class="bg-slate-950 p-2 border border-slate-800">
+              <span class="block text-[9px] text-slate-500 uppercase">Skill</span>
+              <span id="opSkillDisplay" class="text-xs font-bold text-emerald-400 font-mono">Rank 7</span>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs uppercase text-slate-400 mb-1">Select Material Required</label>
-            <select id="itemSelect" class="w-full bg-slate-900 border border-slate-700 p-2 text-white font-mono text-sm">
-              <!-- Dynamic options populated by app.js -->
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs uppercase text-slate-400 mb-1">Amount to Deduct</label>
-            <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-2 text-white" value="1000" min="1">
-          </div>
-          <button onclick="processUpgrade()" class="prts-btn w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-bold tracking-widest uppercase transition">
-            Execute Consumption
-          </button>
-        </div>
-
-        <div class="bg-slate-900/80 p-6 prts-border flex flex-col justify-between">
-          <div>
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Stock Ledger</h3>
-            <ul class="space-y-3">
-              <li class="flex justify-between border-b border-slate-800 pb-2">
-                <span>LMD</span>
-                <span id="stock-lmd" class="font-bold text-cyan-400">250,000</span>
-              </li>
-              <li class="flex justify-between border-b border-slate-800 pb-2">
-                <span>Battle Records</span>
-                <span id="stock-exp" class="font-bold text-cyan-400">450</span>
-              </li>
-              <li class="flex justify-between border-b border-slate-800 pb-2">
-                <span>Sugar Pack</span>
-                <span id="stock-sugar" class="font-bold text-cyan-400">32</span>
-              </li>
-            </ul>
-          </div>
-          <div id="statusMessage" class="mt-4 text-xs font-mono text-slate-500 min-h-[1.5rem]"></div>
         </div>
       </div>
-    </section>
 
+      <div class="bg-cyan-950/20 border border-cyan-500/20 p-3 text-[11px] font-mono text-cyan-300">
+        <span class="font-bold uppercase block mb-1">💡 Terminal Notice:</span>
+        Promoting operators increases base stats and unlocks advanced skill trees. Ensure required materials exist in warehouse storage before initiation.
+      </div>
+    </div>
+
+    <!-- RIGHT: CONSUMPTION REQUISITION FORM -->
+    <div class="lg:col-span-2 bg-slate-900/90 prts-border p-6 flex flex-col justify-between space-y-6">
+      <div>
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-widest">// Resource Allocation Matrix</h3>
+          <span class="text-xs font-mono text-slate-500">IAS101 COMPLIANT</span>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs uppercase text-slate-400 mb-1">Required Enhancement Material</label>
+            <select id="itemSelect" class="w-full bg-slate-950 border border-slate-700 p-3 text-white font-mono text-sm focus:outline-none focus:border-cyan-400">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase text-slate-400 mb-1">Consumption Quantity</label>
+            <input type="number" id="deductQty" class="w-full bg-slate-950 border border-slate-700 p-3 text-cyan-400 font-mono text-lg font-bold focus:outline-none focus:border-cyan-400" value="10" min="1">
+          </div>
+
+          <!-- Material Availability Indicator -->
+          <div class="p-4 bg-slate-950 border border-slate-800 space-y-2">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-400">Current Depot Stock:</span>
+              <span id="currentMatStockDisplay" class="text-cyan-400 font-bold">Checking...</span>
+            </div>
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-400">Stock Remaining After Upgrade:</span>
+              <span id="projectedMatStockDisplay" class="text-slate-200">Checking...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Initiate Action Trigger -->
+      <button onclick="openUpgradeConfirmModal()" class="prts-btn w-full py-4 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+        ⚡ Initiate Operator Upgrade Protocol
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- POPUP MODAL: TACTICAL UPGRADE CONFIRMATION -->
+<div id="upgradeModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+  <div class="bg-slate-900 prts-border max-w-md w-full p-6 space-y-6 shadow-2xl relative">
+    
+    <div class="border-b border-cyan-500/40 pb-3 text-center">
+      <div class="text-[10px] text-cyan-400 font-mono tracking-widest mb-1">RHODES ISLAND TERMINAL // CONFIRMATION</div>
+      <h3 class="text-xl font-black text-white tracking-wider uppercase">Confirm Material Consumption</h3>
+    </div>
+
+    <!-- Modal Detail Breakdown -->
+    <div class="space-y-3 bg-slate-950 p-4 border border-slate-800 text-xs font-mono">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <span class="text-slate-400">Target Operator:</span>
+        <span id="modalOpName" class="text-cyan-400 font-bold text-sm">--</span>
+      </div>
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <span class="text-slate-400">Resource Deducted:</span>
+        <span id="modalItemName" class="text-amber-400 font-bold">--</span>
+      </div>
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <span class="text-slate-400">Amount:</span>
+        <span id="modalQty" class="text-red-400 font-bold text-sm">--</span>
+      </div>
+      <div class="flex justify-between items-center pt-1">
+        <span class="text-slate-400">Authorized By:</span>
+        <span id="modalAuthUser" class="text-emerald-400 font-bold">Doctor</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3">
+      <button onclick="closeUpgradeConfirmModal()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold uppercase text-xs tracking-wider transition">
+        Cancel
+      </button>
+      <button onclick="executeConfirmedUpgrade()" class="prts-btn w-1/2 py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-black uppercase text-xs tracking-wider transition">
+        Confirm & Execute
+      </button>
+    </div>
+
+  </div>
+</div>
     <!-- 05. SECURITY AUDIT LOGS VIEW -->
     <section id="view-logs" class="tab-view hidden max-w-4xl mx-auto space-y-6">
       <div class="border-l-4 border-cyan-400 pl-4">
