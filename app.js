@@ -849,3 +849,164 @@ async function registerUser() {
     regError.innerText = "ERR: Failed to connect to core database.";
   }
 }
+// Dynamic Inventory State from Google Sheets
+let inventory = {}; 
+
+// EXP Values for Card Tiers
+const EXP_VALUES = {
+  card_exp_1: 20,   // Drill Plan
+  card_exp_2: 100,  // Frontline Plan
+  card_exp_3: 400,  // Tactical Plan
+  card_exp_4: 2000  // Strategic Plan
+};
+
+// HELPER: Safely get display name directly from Google Sheet data
+function getItemName(key) {
+  if (inventory[key] && inventory[key].name) {
+    return inventory[key].name;
+  }
+  return key.replace(/_/g, ' ').toUpperCase();
+}
+
+// HELPER: Safely get current stock quantity
+function getItemStock(key) {
+  return inventory[key] ? inventory[key].stock : 0;
+}
+
+// POPULATE DROPDOWNS USING SHEET DISPLAY NAMES
+function populateItemDropdowns() {
+  const itemKeys = Object.keys(inventory);
+  const restockSelect = document.getElementById('restockItem');
+  const itemSelect = document.getElementById('itemSelect');
+
+  const optionsHTML = itemKeys.map(key => {
+    const displayName = getItemName(key);
+    return `<option value="${key}">${displayName}</option>`;
+  }).join('');
+
+  if (restockSelect) restockSelect.innerHTML = optionsHTML;
+  if (itemSelect) itemSelect.innerHTML = optionsHTML;
+}
+
+// RENDER TABLES (WAREHOUSE & OPERATOR UPGRADES) USING SHEET NAMES
+function updateAllDisplays() {
+  // Upgrades View Ledger
+  const ledgerContainer = document.querySelector('#view-upgrades ul');
+  if (ledgerContainer) {
+    ledgerContainer.innerHTML = Object.entries(inventory).map(([key, item]) => `
+      <li class="flex justify-between border-b border-slate-800 pb-2">
+        <span class="text-slate-300">${item.name}</span>
+        <span id="stock-${key}" class="font-bold text-cyan-400">${item.stock.toLocaleString()}</span>
+      </li>
+    `).join('');
+  }
+
+  // Warehouse View Table
+  const warehouseTbody = document.querySelector('#view-warehouse tbody');
+  if (warehouseTbody) {
+    warehouseTbody.innerHTML = Object.entries(inventory).map(([key, item]) => {
+      const isLow = item.stock < (LOW_STOCK_THRESHOLDS[key] || 10);
+      return `
+        <tr>
+          <td class="py-3 font-bold text-white">${item.name}</td>
+          <td class="py-3 text-slate-400">${key.startsWith('card_exp') ? 'EXP Card' : 'Material'}</td>
+          <td id="wh-${key}" class="py-3 text-cyan-400 font-mono">${item.stock.toLocaleString()}</td>
+          <td class="py-3 ${isLow ? 'text-amber-400' : 'text-emerald-400'} text-xs">${isLow ? 'LOW STOCK' : 'SUFFICIENT'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  checkStockAlerts();
+  loadSelectedOperatorProfile();
+}
+
+// GREEDY EXP CARD DEDUCTION ENGINE
+function calculateOptimalExpCards(requiredExp) {
+  const expCardTiers = [
+    { key: "card_exp_4", value: EXP_VALUES.card_exp_4 },
+    { key: "card_exp_3", value: EXP_VALUES.card_exp_3 },
+    { key: "card_exp_2", value: EXP_VALUES.card_exp_2 },
+    { key: "card_exp_1", value: EXP_VALUES.card_exp_1 }
+  ];
+
+  let remainingExp = requiredExp;
+  const cardsToDeduct = {};
+  let totalAvailableExp = 0;
+
+  expCardTiers.forEach(tier => {
+    totalAvailableExp += getItemStock(tier.key) * tier.value;
+  });
+
+  if (totalAvailableExp < requiredExp) {
+    return { success: false, totalAvailableExp };
+  }
+
+  for (const tier of expCardTiers) {
+    if (remainingExp <= 0) break;
+
+    const availableCards = getItemStock(tier.key);
+    if (availableCards > 0) {
+      const cardsNeeded = Math.ceil(remainingExp / tier.value);
+      const cardsUsed = Math.min(cardsNeeded, availableCards);
+
+      cardsToDeduct[tier.key] = cardsUsed;
+      remainingExp -= cardsUsed * tier.value;
+    }
+  }
+
+  return { success: remainingExp <= 0, cardsToDeduct };
+}
+
+// EXECUTE PROMOTION & SYNC TO SHEETS
+function executePromotion() {
+  if (currentUser && currentUser.role === "Read-Only") return;
+
+  const select = document.getElementById('operatorSelect');
+  if (!select) return;
+
+  const op = OPERATORS.find(o => o.id === select.value);
+  if (!op) return;
+
+  const expCheck = calculateOptimalExpCards(op.requirements.exp);
+  if (!expCheck.success) {
+    alert(`INSUFFICIENT EXP: Need ${op.requirements.exp} EXP, but only ${expCheck.totalAvailableExp} EXP available across all cards.`);
+    return;
+  }
+
+  // 1. Deduct standard materials
+  Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+    const key = matKey.toLowerCase();
+    if (key !== 'exp' && inventory[key]) {
+      inventory[key].stock -= reqQty;
+      syncToCloud("UPDATE_INVENTORY", {
+        itemKey: key,
+        newQty: inventory[key].stock
+      });
+    }
+  });
+
+  // 2. Deduct calculated EXP cards
+  Object.entries(expCheck.cardsToDeduct).forEach(([cardKey, qtyUsed]) => {
+    if (inventory[cardKey]) {
+      inventory[cardKey].stock -= qtyUsed;
+      syncToCloud("UPDATE_INVENTORY", {
+        itemKey: cardKey,
+        newQty: inventory[cardKey].stock
+      });
+    }
+  });
+
+  // 3. Update Operator Stage
+  op.elite += 1;
+  op.level = 1;
+  op.maxLevel = op.elite === 2 ? 90 : 80;
+
+  closePromotionModal();
+
+  localStorage.setItem('prts_operators', JSON.stringify(OPERATORS));
+  addAuditLog("PROMOTION", `Promoted ${op.name} to Elite ${op.elite}. Deducted EXP Cards: ${JSON.stringify(expCheck.cardsToDeduct)}`);
+
+  updateAllDisplays();
+  populateOperatorDropdown();
+}
