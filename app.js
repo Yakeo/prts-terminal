@@ -483,37 +483,41 @@ function loadSelectedOperatorProfile() {
   grid.innerHTML = '';
   let hasEnoughMaterials = true;
 
-  Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
-    let currentStock = 0;
-    let isSufficient = false;
+  if (op.requirements) {
+    Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+      let currentStock = 0;
+      let isSufficient = false;
 
-    if (matKey.toLowerCase() === 'exp') {
-      const expCheck = calculateOptimalExpCards(reqQty);
-      currentStock = expCheck.totalAvailableExp;
-      isSufficient = expCheck.success;
-    } else {
-      currentStock = getItemStock(matKey.toLowerCase());
-      isSufficient = currentStock >= reqQty;
-    }
+      const safeReqQty = Number(reqQty) || 0;
 
-    if (!isSufficient) hasEnoughMaterials = false;
+      if (matKey.toLowerCase() === 'exp') {
+        const expCheck = calculateOptimalExpCards(safeReqQty);
+        currentStock = Number(expCheck.totalAvailableExp) || 0;
+        isSufficient = expCheck.success;
+      } else {
+        currentStock = Number(getItemStock(matKey.toLowerCase())) || 0;
+        isSufficient = currentStock >= safeReqQty;
+      }
 
-    const card = document.createElement('div');
-    card.className = `p-3 border text-center font-mono ${
-      isSufficient ? 'bg-slate-950 border-slate-800' : 'bg-red-950/20 border-red-500/50'
-    }`;
+      if (!isSufficient) hasEnoughMaterials = false;
 
-    card.innerHTML = `
-      <div class="text-[10px] text-slate-400 uppercase truncate mb-1">${matKey.toUpperCase()}</div>
-      <div class="text-base font-bold ${isSufficient ? 'text-cyan-400' : 'text-red-400'}">
-        ${currentStock.toLocaleString()} / <span class="text-slate-300">${reqQty.toLocaleString()}</span>
-      </div>
-      <div class="text-[9px] mt-1 ${isSufficient ? 'text-emerald-400' : 'text-red-400'}">
-        ${isSufficient ? '✓ SUFFICIENT' : '✕ INSUFFICIENT'}
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+      const card = document.createElement('div');
+      card.className = `p-3 border text-center font-mono ${
+        isSufficient ? 'bg-slate-950 border-slate-800' : 'bg-red-950/20 border-red-500/50'
+      }`;
+
+      card.innerHTML = `
+        <div class="text-[10px] text-slate-400 uppercase truncate mb-1">${matKey.toUpperCase()}</div>
+        <div class="text-base font-bold ${isSufficient ? 'text-cyan-400' : 'text-red-400'}">
+          ${currentStock.toLocaleString()} / <span class="text-slate-300">${safeReqQty.toLocaleString()}</span>
+        </div>
+        <div class="text-[9px] mt-1 ${isSufficient ? 'text-emerald-400' : 'text-red-400'}">
+          ${isSufficient ? '✓ SUFFICIENT' : '✕ INSUFFICIENT'}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
 
   const btn = document.getElementById('btnInitiatePromotion') || document.getElementById('btnOpenUpgradeModal');
   if (btn) {
@@ -532,7 +536,6 @@ function loadSelectedOperatorProfile() {
     }
   }
 }
-
 function openPromotionModal() {
   const select = document.getElementById('operatorSelect');
   if (!select) return;
