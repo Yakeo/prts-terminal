@@ -183,7 +183,6 @@ let OPERATORS = [
   }
 ];
 
-
 document.addEventListener('DOMContentLoaded', () => {
   const savedOperators = localStorage.getItem('prts_operators');
   if (savedOperators) {
@@ -200,11 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       currentUser = JSON.parse(savedSession);
       
-      // Auto-hide login modals
       const loginModal = document.getElementById('loginModal');
       if (loginModal) loginModal.classList.add('hidden');
 
-      // Update UI displays
       const userDisplay = document.getElementById('currentUserDisplay');
       const roleDisplay = document.getElementById('dashRoleDisplay');
       if (userDisplay) userDisplay.innerText = `${currentUser.displayName} (${currentUser.role})`;
@@ -244,6 +241,19 @@ function getItemStock(key) {
   return 0;
 }
 
+async function updateInventoryStock(itemKey, deltaAmount) {
+  const currentVal = getItemStock(itemKey);
+  const newVal = Math.max(0, currentVal + deltaAmount);
+
+  if (typeof inventory[itemKey] === 'object') {
+    inventory[itemKey].stock = newVal;
+  } else {
+    inventory[itemKey] = newVal;
+  }
+
+  await syncToCloud("UPDATE_INVENTORY", { itemKey: itemKey, newQty: newVal });
+}
+
 // FETCH DATA FROM GOOGLE SHEETS
 async function fetchCloudData() {
   const errorElement = document.getElementById('loginError');
@@ -259,6 +269,7 @@ async function fetchCloudData() {
 
     updateAllDisplays();
     populateItemDropdowns();
+    populateRestockDropdown();
     renderAuditLogs();
 
     if (errorElement) errorElement.innerText = "";
@@ -380,7 +391,6 @@ function verify2FACode() {
   pendingUser = null;
   generatedOTP = null;
 
-  // SAVE SESSION TO LOCAL STORAGE
   localStorage.setItem('prts_session_user', JSON.stringify(currentUser));
 
   document.getElementById('otpModal').classList.add('hidden');
@@ -399,7 +409,7 @@ function verify2FACode() {
 
 function logout() {
   currentUser = null;
-  localStorage.removeItem('prts_session_user'); // CLEAR SAVED SESSION
+  localStorage.removeItem('prts_session_user');
   
   const loginModal = document.getElementById('loginModal');
   if (loginModal) loginModal.classList.remove('hidden');
@@ -593,7 +603,6 @@ function loadSelectedOperatorProfile() {
   grid.innerHTML = '';
   let hasEnoughMaterials = true;
 
-  // Dynamically resolve target promotion requirements
   const nextStage = op.elite + 1;
   const targetReqs = op.promotions ? op.promotions[nextStage] : op.requirements;
 
@@ -737,7 +746,6 @@ async function executePromotion() {
   if (!op) return;
 
   const nextStage = op.elite + 1;
-  // Fall back to op.requirements if promotions object isn't present
   const targetReqs = op.promotions ? op.promotions[nextStage] : op.requirements;
 
   if (!targetReqs) {
@@ -745,7 +753,6 @@ async function executePromotion() {
     return;
   }
 
-  // Disable button during execution
   const confirmBtn = document.getElementById('btnConfirmModalUpgrade');
   if (confirmBtn) {
     confirmBtn.disabled = true;
@@ -753,7 +760,6 @@ async function executePromotion() {
   }
 
   try {
-    // 1. Process Material Deductions
     for (const [matKey, reqQty] of Object.entries(targetReqs)) {
       const cleanKey = matKey.toLowerCase().trim();
       const safeReqQty = Number(reqQty) || 0;
@@ -770,16 +776,17 @@ async function executePromotion() {
       }
     }
 
-    // 2. Advance Operator Elite Stage & Reset Level / MaxLevel
     op.elite = nextStage;
     op.level = 1;
     op.maxLevel = op.elite === 1 ? 70 : 90;
 
-    // 3. UI Cleanup & Refresh
+    localStorage.setItem('prts_operators', JSON.stringify(OPERATORS));
+    addAuditLog("PROMOTION", `Promoted ${op.name} to Elite ${op.elite}.`);
+
     closePromotionModal();
     loadSelectedOperatorProfile();
-    if (typeof renderWarehouse === 'function') renderWarehouse();
-    if (typeof renderDashboard === 'function') renderDashboard();
+    populateOperatorDropdown();
+    updateAllDisplays();
 
     alert(`SUCCESS: ${op.name} promoted to Elite ${op.elite}! Depot inventory updated.`);
   } catch (err) {
@@ -793,49 +800,6 @@ async function executePromotion() {
   }
 }
 
-  // 1. Deduct standard materials
-  Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
-    const key = matKey.toLowerCase();
-    if (key !== 'exp' && inventory[key]) {
-      const currentVal = getItemStock(key);
-      const newVal = Math.max(0, currentVal - reqQty);
-      if (typeof inventory[key] === 'object') {
-        inventory[key].stock = newVal;
-      } else {
-        inventory[key] = newVal;
-      }
-      syncToCloud("UPDATE_INVENTORY", { itemKey: key, newQty: newVal });
-    }
-  });
-
-  // 2. Deduct calculated EXP cards
-  Object.entries(expCheck.cardsToDeduct).forEach(([cardKey, qtyUsed]) => {
-    if (inventory[cardKey]) {
-      const currentVal = getItemStock(cardKey);
-      const newVal = Math.max(0, currentVal - qtyUsed);
-      if (typeof inventory[cardKey] === 'object') {
-        inventory[cardKey].stock = newVal;
-      } else {
-        inventory[cardKey] = newVal;
-      }
-      syncToCloud("UPDATE_INVENTORY", { itemKey: cardKey, newQty: newVal });
-    }
-  });
-
-  // 3. Advance Operator Stats
-  op.elite += 1;
-  op.level = 1;
-  op.maxLevel = op.elite === 2 ? 90 : 80;
-
-  closePromotionModal();
-
-  localStorage.setItem('prts_operators', JSON.stringify(OPERATORS));
-  addAuditLog("PROMOTION", `Promoted ${op.name} to Elite ${op.elite}. Deducted EXP cards: ${JSON.stringify(expCheck.cardsToDeduct)}`);
-
-  updateAllDisplays();
-  populateOperatorDropdown();
-}
-
 function openUpgradeConfirmModal() { openPromotionModal(); }
 function closeUpgradeConfirmModal() { closePromotionModal(); }
 function executeConfirmedUpgrade() { executePromotion(); }
@@ -844,8 +808,12 @@ function executeConfirmedUpgrade() { executePromotion(); }
 function processRestock() {
   if (currentUser && currentUser.role === "Read-Only") return;
 
-  const itemKey = document.getElementById('restockItem').value;
-  const qtyInput = document.getElementById('restockQty');
+  const itemSelect = document.getElementById('restockItemSelect') || document.getElementById('restockItem');
+  const qtyInput = document.getElementById('restockAmount') || document.getElementById('restockQty');
+
+  if (!itemSelect || !qtyInput) return;
+
+  const itemKey = itemSelect.value;
   const qty = parseInt(qtyInput.value, 10);
   const restockMsg = document.getElementById('restockMsg');
 
@@ -874,9 +842,10 @@ function processRestock() {
   }
 
   addAuditLog("RESTOCK", `Added +${qty.toLocaleString()} ${getItemName(itemKey)}.`);
-  qtyInput.value = "";
+  qtyInput.value = "100";
 
   syncToCloud("UPDATE_INVENTORY", { itemKey: itemKey, newQty: newStock });
+  updateRestockItemPreview();
 }
 
 function checkStockAlerts() {
@@ -964,9 +933,10 @@ function toggleRegisterModal(show) {
     loginModal.classList.remove('hidden');
   }
 }
-// Populate Restock Dropdown and sync initial preview
+
+// RESTOCK PREVIEW & CALCULATORS
 function populateRestockDropdown() {
-  const select = document.getElementById('restockItemSelect');
+  const select = document.getElementById('restockItemSelect') || document.getElementById('restockItem');
   if (!select || !inventory) return;
 
   select.innerHTML = '';
@@ -980,9 +950,8 @@ function populateRestockDropdown() {
   updateRestockItemPreview();
 }
 
-// Live update of selected item stats
 function updateRestockItemPreview() {
-  const select = document.getElementById('restockItemSelect');
+  const select = document.getElementById('restockItemSelect') || document.getElementById('restockItem');
   if (!select) return;
 
   const itemKey = select.value;
@@ -999,19 +968,17 @@ function updateRestockItemPreview() {
   updateRestockProjection();
 }
 
-// Quick amount preset buttons
 function setRestockAmount(amt) {
-  const input = document.getElementById('restockAmount');
+  const input = document.getElementById('restockAmount') || document.getElementById('restockQty');
   if (input) {
     input.value = amt;
     updateRestockProjection();
   }
 }
 
-// Calculate projected new total
 function updateRestockProjection() {
-  const select = document.getElementById('restockItemSelect');
-  const input = document.getElementById('restockAmount');
+  const select = document.getElementById('restockItemSelect') || document.getElementById('restockItem');
+  const input = document.getElementById('restockAmount') || document.getElementById('restockQty');
   const display = document.getElementById('projectedStockDisplay');
 
   if (!select || !input || !display) return;
