@@ -7,17 +7,126 @@ let currentUser = null;
 let pendingUser = null;
 let generatedOTP = null;
 
-const OPERATORS = [
-  { id: "Amiya", name: "Amiya", class: "Caster", rarity: 5, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_002_amiya.png" },
-  { id: "SilverAsh", name: "SilverAsh", class: "Guard", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_010_chen.png" },
-  { id: "Kaltsit", name: "Kal'tsit", class: "Medic", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_003_kalts.png" },
-  { id: "Exusiai", name: "Exusiai", class: "Sniper", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_103_angel.png" },
-  { id: "Surtr", name: "Surtr", class: "Guard", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_350_surtr.png" },
-  { id: "Texas", name: "Texas", class: "Vanguard", rarity: 5, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_102_texas.png" },
-  { id: "Saria", name: "Saria", class: "Defender", rarity: 6, avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_202_demhar.png" }
+// EXPANDED OPERATORS DATABASE WITH PROMOTION STATES & MULTI-ITEM REQUIREMENTS
+let OPERATORS = [
+  { 
+    id: "Amiya", 
+    name: "Amiya", 
+    class: "Caster", 
+    rarity: 5, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_002_amiya.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    requirements: {
+      lmd: 50000,
+      exp: 200,
+      sugar: 5
+    }
+  },
+  { 
+    id: "Chen", 
+    name: "Ch'en", 
+    class: "Guard", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_010_chen.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    requirements: {
+      lmd: 180000,
+      exp: 500,
+      sugar: 10
+    }
+  },
+  { 
+    id: "Kaltsit", 
+    name: "Kal'tsit", 
+    class: "Medic", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_003_kalts.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    requirements: {
+      lmd: 180000,
+      exp: 450,
+      sugar: 8
+    }
+  },
+  { 
+    id: "Exusiai", 
+    name: "Exusiai", 
+    class: "Sniper", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_103_angel.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    requirements: {
+      lmd: 180000,
+      exp: 400,
+      sugar: 5
+    }
+  },
+  { 
+    id: "Surtr", 
+    name: "Surtr", 
+    class: "Guard", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_350_surtr.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    requirements: {
+      lmd: 30000,
+      exp: 150,
+      sugar: 3
+    }
+  },
+  { 
+    id: "Texas", 
+    name: "Texas", 
+    class: "Vanguard", 
+    rarity: 5, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_102_texas.png",
+    elite: 0,
+    level: 50,
+    maxLevel: 50,
+    requirements: {
+      lmd: 40000,
+      exp: 180,
+      sugar: 4
+    }
+  },
+  { 
+    id: "Saria", 
+    name: "Saria", 
+    class: "Defender", 
+    rarity: 6, 
+    avatar: "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/char_202_demhar.png",
+    elite: 1,
+    level: 80,
+    maxLevel: 80,
+    requirements: {
+      lmd: 180000,
+      exp: 500,
+      sugar: 12
+    }
+  }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Load saved operator states from local storage if available
+  const savedOperators = localStorage.getItem('prts_operators');
+  if (savedOperators) {
+    try {
+      OPERATORS = JSON.parse(savedOperators);
+    } catch (e) {
+      console.error("Failed to parse saved operators", e);
+    }
+  }
+
   fetchCloudData();
   populateOperatorDropdown();
 
@@ -99,12 +208,10 @@ async function authenticateUser() {
     u => u.username === userInput || u.email?.toLowerCase() === userInput
   );
 
-  // DEBUG LOGS - Open your browser F12 Console to see these!
   console.log("Input Plain:", passInput);
   console.log("Input Hashed:", hashedInput);
   console.log("DB User Found:", foundUser);
 
-  // Allow match if DB stores hashed password OR legacy plain text password
   const isValidPassword = foundUser && (foundUser.pass === hashedInput || foundUser.pass === passInput);
 
   if (!foundUser || !isValidPassword) {
@@ -201,7 +308,6 @@ function applyRBAC() {
   const accessBtn = document.querySelector("button[onclick*='access']");
   const adminPanel = document.getElementById('adminCreatePersonnelCard');
 
-  // Reset states
   [restockBtn, upgradeBtn, logsBtn, accessBtn].forEach(btn => {
     if (btn) {
       btn.classList.remove('opacity-40', 'pointer-events-none', 'hidden');
@@ -209,19 +315,16 @@ function applyRBAC() {
   });
 
   if (role === 'Admin') {
-    // Admins have unrestricted access
     if (adminPanel) adminPanel.classList.remove('hidden');
     switchTab('dashboard');
 
   } else if (role === 'Manager') {
-    // Managers can Restock & Upgrade, but CANNOT access Logs or Access Control Settings
     if (logsBtn) logsBtn.classList.add('opacity-40', 'pointer-events-none');
     if (accessBtn) accessBtn.classList.add('opacity-40', 'pointer-events-none');
     if (adminPanel) adminPanel.classList.add('hidden');
     switchTab('dashboard');
 
   } else { 
-    // Operator or Read-Only: Restricted to Warehouse view only
     if (restockBtn) restockBtn.classList.add('opacity-40', 'pointer-events-none');
     if (upgradeBtn) upgradeBtn.classList.add('opacity-40', 'pointer-events-none');
     if (logsBtn) logsBtn.classList.add('opacity-40', 'pointer-events-none');
@@ -232,7 +335,7 @@ function applyRBAC() {
   }
 }
 
-// Function for Admins to create elevated accounts from inside the terminal
+// Admin provision personnel
 async function adminProvisionUser() {
   if (!currentUser || currentUser.role !== 'Admin') {
     alert("ACCESS DENIED: Only Admin personnel can provision accounts.");
@@ -294,8 +397,7 @@ async function adminProvisionUser() {
   }
 }
 
-
-// Navigation Tab Switching Guarded by RBAC
+// Navigation Tab Switching
 function switchTab(tabName) {
   if (currentUser?.role === 'Read-Only' && ['restock', 'upgrades', 'logs'].includes(tabName)) {
     alert("ACCESS DENIED: Read-Only personnel clearance level insufficient.");
@@ -315,39 +417,199 @@ function switchTab(tabName) {
   updateAllDisplays();
 }
 
-// Function to dynamically update the preview image and details
-function updateOperatorPreview() {
-  const opSelect = document.getElementById('operatorSelect');
-  if (!opSelect) return;
+// POPULATE OPERATOR SELECT DROPDOWN
+function populateOperatorDropdown() {
+  const select = document.getElementById('operatorSelect');
+  if (!select) return;
 
-  const selectedId = opSelect.value;
-  const op = OPERATORS.find(o => o.id === selectedId);
+  select.innerHTML = '';
+  OPERATORS.forEach(op => {
+    const opt = document.createElement('option');
+    opt.value = op.id;
+    opt.textContent = `${op.name} (${'★'.repeat(op.rarity)} | Elite ${op.elite})`;
+    select.appendChild(opt);
+  });
 
-  const imgEl = document.getElementById('opPreviewImg');
-  const nameEl = document.getElementById('opPreviewName');
-  const infoEl = document.getElementById('opPreviewInfo');
+  loadSelectedOperatorProfile();
+}
 
-  if (op && op.avatar && imgEl && nameEl && infoEl) {
-    imgEl.src = op.avatar;
-    nameEl.innerText = op.name;
-    infoEl.innerText = `${'★'.repeat(op.rarity)} | ${op.class}`;
+// UPDATE OPERATOR DISPLAY CARD & MATERIAL REQUIREMENTS
+function loadSelectedOperatorProfile() {
+  const select = document.getElementById('operatorSelect');
+  if (!select) return;
+
+  const opId = select.value;
+  const op = OPERATORS.find(o => o.id === opId);
+  if (!op) return;
+
+  // Update Profile Card
+  const imgElem = document.getElementById('opPreviewImg');
+  const nameElem = document.getElementById('opPreviewName');
+  const classElem = document.getElementById('opPreviewClass') || document.getElementById('opPreviewInfo');
+  const eliteElem = document.getElementById('opEliteDisplay');
+  const levelElem = document.getElementById('opLevelDisplay');
+  const maxLevelElem = document.getElementById('opMaxLevelDisplay');
+
+  if (imgElem) imgElem.src = op.avatar;
+  if (nameElem) nameElem.innerText = op.name;
+  if (classElem) classElem.innerText = `${'★'.repeat(op.rarity)} | ${op.class}`;
+  if (eliteElem) eliteElem.innerText = `Elite ${op.elite}`;
+  if (levelElem) levelElem.innerText = `Lv. ${op.level}`;
+  if (maxLevelElem) maxLevelElem.innerText = op.maxLevel;
+
+  // Update Stage Indicators
+  const stageCurrent = document.getElementById('stageCurrent');
+  const stageTarget = document.getElementById('stageTarget');
+  if (stageCurrent) stageCurrent.innerText = `Elite ${op.elite}`;
+  if (stageTarget) stageTarget.innerText = op.elite >= 2 ? `MAX` : `Elite ${op.elite + 1}`;
+
+  // Render Material Requirements Grid
+  const grid = document.getElementById('requiredMaterialsGrid');
+  if (!grid) return;
+
+  grid.innerHTML = '';
+  let hasEnoughMaterials = true;
+
+  Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+    const currentStock = inventory[matKey] || 0;
+    const isSufficient = currentStock >= reqQty;
+    if (!isSufficient) hasEnoughMaterials = false;
+
+    const card = document.createElement('div');
+    card.className = `p-3 border text-center font-mono ${
+      isSufficient ? 'bg-slate-950 border-slate-800' : 'bg-red-950/20 border-red-500/50'
+    }`;
+
+    card.innerHTML = `
+      <div class="text-[10px] text-slate-400 uppercase truncate mb-1">${matKey.toUpperCase()}</div>
+      <div class="text-base font-bold ${isSufficient ? 'text-cyan-400' : 'text-red-400'}">
+        ${currentStock.toLocaleString()} / <span class="text-slate-300">${reqQty.toLocaleString()}</span>
+      </div>
+      <div class="text-[9px] mt-1 ${isSufficient ? 'text-emerald-400' : 'text-red-400'}">
+        ${isSufficient ? '✓ SUFFICIENT' : '✕ INSUFFICIENT'}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Enable/Disable Action Button
+  const btn = document.getElementById('btnInitiatePromotion') || document.getElementById('btnOpenUpgradeModal');
+  if (btn) {
+    if (op.elite >= 2) {
+      btn.disabled = true;
+      btn.innerText = "MAX ELITE PHASE REACHED";
+      btn.className = "w-full py-4 bg-slate-800 text-slate-500 font-bold text-sm tracking-widest uppercase cursor-not-allowed";
+    } else if (!hasEnoughMaterials) {
+      btn.disabled = true;
+      btn.innerText = "INSUFFICIENT RESOURCES IN DEPOT";
+      btn.className = "w-full py-4 bg-slate-800 text-red-400 border border-red-500/30 font-bold text-sm tracking-widest uppercase cursor-not-allowed";
+    } else {
+      btn.disabled = false;
+      btn.innerText = "⚡ Promote Operator";
+      btn.className = "prts-btn w-full py-4 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]";
+    }
   }
 }
 
-// Function to populate the dropdown and trigger initial preview
-function populateOperatorDropdown() {
-  const opSelect = document.getElementById('operatorSelect');
-  if (!opSelect) return;
+// OPEN PROMOTION POPUP MODAL
+function openPromotionModal() {
+  const select = document.getElementById('operatorSelect');
+  if (!select) return;
 
-  opSelect.innerHTML = OPERATORS.map(op => 
-    `<option value="${op.id}">${op.name} (${op.class}) - ${'★'.repeat(op.rarity)}</option>`
-  ).join('');
+  const op = OPERATORS.find(o => o.id === select.value);
+  if (!op) return;
 
-  // Call update preview right after populating
-  updateOperatorPreview();
+  const titleElem = document.getElementById('modalPromoteTitle') || document.getElementById('modalOpName');
+  if (titleElem) titleElem.innerText = `Promote ${op.name} to Elite ${op.elite + 1}`;
+
+  const listContainer = document.getElementById('modalMaterialsList');
+  if (listContainer) {
+    listContainer.innerHTML = '';
+    Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+      const row = document.createElement('div');
+      row.className = "flex justify-between items-center";
+      row.innerHTML = `
+        <span class="text-slate-300 uppercase">${matKey}:</span>
+        <span class="text-red-400 font-bold">-${reqQty.toLocaleString()}</span>
+      `;
+      listContainer.appendChild(row);
+    });
+  }
+
+  const authUserElem = document.getElementById('modalAuthUser');
+  if (authUserElem) authUserElem.innerText = currentUser ? currentUser.username : 'Doctor';
+
+  const modal = document.getElementById('promotionModal') || document.getElementById('upgradeModal');
+  if (modal) modal.classList.remove('hidden');
 }
 
-// Populate Item Options dynamically into Restock & Upgrade dropdowns
+// CLOSE PROMOTION MODAL
+function closePromotionModal() {
+  const modal = document.getElementById('promotionModal') || document.getElementById('upgradeModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+// EXECUTE PROMOTION & SAVE STATE
+function executePromotion() {
+  if (currentUser && currentUser.role === "Read-Only") return;
+
+  const select = document.getElementById('operatorSelect');
+  if (!select) return;
+
+  const op = OPERATORS.find(o => o.id === select.value);
+  if (!op) return;
+
+  // 1. Deduct Materials from Inventory
+  Object.entries(op.requirements).forEach(([matKey, reqQty]) => {
+    if (inventory[matKey] !== undefined) {
+      inventory[matKey] -= reqQty;
+      // Sync each deducted item back to Google Sheets
+      syncToCloud("UPDATE_INVENTORY", {
+        itemKey: matKey,
+        newQty: inventory[matKey]
+      });
+    }
+  });
+
+  // 2. Advance Operator Stats
+  op.elite += 1;
+  op.level = 1; // Resets level on promotion
+  op.maxLevel = op.elite === 2 ? 90 : 80;
+
+  // Scale requirement values for Elite 2
+  if (op.elite === 1) {
+    op.requirements = {
+      lmd: 180000,
+      exp: 600,
+      sugar: 15
+    };
+  }
+
+  closePromotionModal();
+
+  // 3. Persist Operator Progress Locally
+  localStorage.setItem('prts_operators', JSON.stringify(OPERATORS));
+
+  // 4. Log Action
+  addAuditLog("PROMOTION", `Promoted Operator ${op.name} to Elite ${op.elite}.`);
+
+  // 5. Refresh UI Displays
+  updateAllDisplays();
+  populateOperatorDropdown();
+
+  const statusMsg = document.getElementById('statusMessage');
+  if (statusMsg) {
+    statusMsg.className = "mt-4 text-xs font-mono text-emerald-400 font-bold";
+    statusMsg.innerText = `SUCCESS: ${op.name} promoted to Elite ${op.elite}!`;
+  }
+}
+
+// Legacy Modal compatibility aliases
+function openUpgradeConfirmModal() { openPromotionModal(); }
+function closeUpgradeConfirmModal() { closePromotionModal(); }
+function executeConfirmedUpgrade() { executePromotion(); }
+
+// Populate Item Options into Restock dropdowns
 function populateItemDropdowns() {
   const itemKeys = Object.keys(inventory);
   const restockSelect = document.getElementById('restockItem');
@@ -363,7 +625,6 @@ function populateItemDropdowns() {
 
 // Dynamic Render Stock UI for N items
 function updateAllDisplays() {
-  // Update Stock Ledger List in Upgrade View
   const ledgerContainer = document.querySelector('#view-upgrades ul');
   if (ledgerContainer) {
     ledgerContainer.innerHTML = Object.entries(inventory).map(([key, qty]) => `
@@ -374,7 +635,6 @@ function updateAllDisplays() {
     `).join('');
   }
 
-  // Update Warehouse Table
   const warehouseTbody = document.querySelector('#view-warehouse tbody');
   if (warehouseTbody) {
     warehouseTbody.innerHTML = Object.entries(inventory).map(([key, qty]) => {
@@ -391,6 +651,7 @@ function updateAllDisplays() {
   }
 
   checkStockAlerts();
+  loadSelectedOperatorProfile();
 }
 
 // Security Audit Logger
@@ -411,44 +672,6 @@ function addAuditLog(action, details) {
 
 function renderAuditLogs() {
   filterAuditLogs();
-}
-
-// Process Inventory Consumption (Stock Out)
-function processUpgrade() {
-  if (currentUser && currentUser.role === "Read-Only") return;
-
-  const operator = document.getElementById('operatorSelect').value;
-  const itemKey = document.getElementById('itemSelect').value;
-  const qtyInput = document.getElementById('deductQty');
-  const qty = parseInt(qtyInput.value, 10);
-  const statusMsg = document.getElementById('statusMessage');
-
-  if (isNaN(qty) || qty <= 0) {
-    statusMsg.className = "mt-4 text-xs font-mono text-red-400";
-    statusMsg.innerText = "ERR: Invalid transaction quantity.";
-    return;
-  }
-
-  if ((inventory[itemKey] || 0) < qty) {
-    statusMsg.className = "mt-4 text-xs font-mono text-red-500 font-bold";
-    statusMsg.innerText = `REJECTED: Insufficient ${itemKey.toUpperCase()} available.`;
-    addAuditLog("REJECTED", `Attempted to deduct ${qty} ${itemKey.toUpperCase()} for ${operator} (Insufficient Stock).`);
-    return;
-  }
-
-  inventory[itemKey] -= qty;
-  updateAllDisplays();
-
-  statusMsg.className = "mt-4 text-xs font-mono text-emerald-400";
-  statusMsg.innerText = `SUCCESS: Deducted ${qty} ${itemKey.toUpperCase()} for ${operator}.`;
-  
-  addAuditLog("DEDUCT", `Deducted ${qty.toLocaleString()} ${itemKey.toUpperCase()} for Operator ${operator}.`);
-  qtyInput.value = "";
-
-  syncToCloud("UPDATE_INVENTORY", {
-    itemKey: itemKey,
-    newQty: inventory[itemKey]
-  });
 }
 
 // Process Inventory Restock (Stock In)
@@ -548,7 +771,7 @@ function renderLogTable(logsToRender) {
       <td class="py-2 text-slate-500">${log.timestamp}</td>
       <td class="py-2 text-cyan-400 font-bold">${log.user}</td>
       <td class="py-2 ${
-        log.action === 'DEDUCT' || log.action === 'AUTH_FAILED' ? 'text-amber-400' : 
+        log.action === 'DEDUCT' || log.action === 'AUTH_FAILED' || log.action === 'PROMOTION' ? 'text-amber-400' : 
         log.action === 'REJECTED' ? 'text-red-400' : 'text-emerald-400'
       }">${log.action}</td>
       <td class="py-2 text-slate-300">${log.details}</td>
@@ -624,43 +847,5 @@ async function registerUser() {
     }
   } catch (err) {
     regError.innerText = "ERR: Failed to connect to core database.";
-  }
-}
-// Open Upgrade Confirmation Popup Modal
-function openUpgradeConfirmModal() {
-  const opSelect = document.getElementById('operatorSelect');
-  const itemSelect = document.getElementById('itemSelect');
-  const qtyInput = document.getElementById('deductQty');
-
-  const selectedOp = opSelect.options[opSelect.selectedIndex]?.text || 'Operator';
-  const selectedItem = itemSelect.options[itemSelect.selectedIndex]?.text || 'Material';
-  const qty = parseInt(qtyInput.value) || 0;
-
-  if (qty <= 0) {
-    alert("Please enter a valid quantity greater than zero.");
-    return;
-  }
-
-  // Populate Modal Fields
-  document.getElementById('modalOpName').innerText = selectedOp;
-  document.getElementById('modalItemName').innerText = selectedItem;
-  document.getElementById('modalQty').innerText = `-${qty}`;
-  document.getElementById('modalAuthUser').innerText = currentUser ? currentUser.username : 'Authorized User';
-
-  // Show Modal
-  document.getElementById('upgradeModal').classList.remove('hidden');
-}
-
-// Close Modal
-function closeUpgradeConfirmModal() {
-  document.getElementById('upgradeModal').classList.add('hidden');
-}
-
-// Execute the upgrade process from modal
-function executeConfirmedUpgrade() {
-  closeUpgradeConfirmModal();
-  // Triggers existing upgrade function logic
-  if (typeof processUpgrade === 'function') {
-    processUpgrade();
   }
 }
